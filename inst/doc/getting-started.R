@@ -44,15 +44,15 @@ head(endpoints, 5)
 ## ----handelsregister, eval = FALSE--------------------------------------------
 # companies <- handelsregister_search("deutsche bahn")
 
-## ----smard, eval = TRUE-------------------------------------------------------
-library(ggplot2)
-
-timestamp <- 1627250400000
-series <- smard_timeseries(410, region = "DE", resolution = "hour", timestamp = timestamp)
-
-ggplot(series, aes(time, value)) +
-  geom_line() +
-  labs(x = "Time", y = "MW")
+## ----smard, eval = FALSE------------------------------------------------------
+# library(ggplot2)
+# 
+# timestamp <- 1627250400000
+# series <- smard_timeseries(410, region = "DE", resolution = "hour", timestamp = timestamp)
+# 
+# ggplot(series, aes(time, value)) +
+#   geom_line() +
+#   labs(x = "Time", y = "MW")
 
 ## ----dwd, eval = FALSE--------------------------------------------------------
 # stations <- dwd_station_overview(c("10865", "G005"), flatten = TRUE)
