@@ -1,10 +1,9 @@
 Package: bunddev
 Title: Discover and Call 'Bund.dev' APIs
-Version: 0.2.0
+Version: 0.2.1
 Authors@R: 
-    person("Michael", "Bücker", , "michael.buecker@fh-muenster.de", role = c("aut", "cre"))
-Author: Michael Bücker [aut, cre]
-Maintainer: Michael Bücker <michael.buecker@fh-muenster.de>
+    person("Michael", "Bücker", , "michael.buecker@fh-muenster.de", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0003-0045-8460"))
 Depends: R (>= 4.1.0)
 Description: Provides a registry of APIs listed on <https://bund.dev> and a core
     'OpenAPI' client layer to explore specs and perform requests. Adapter helpers
@@ -21,6 +20,9 @@ Imports: cli, dplyr, httr2, jsonlite, purrr, rlang, stringr, tibble,
         tidyr, tools, xml2, yaml
 VignetteBuilder: knitr, rmarkdown
 NeedsCompilation: no
-Packaged: 2026-02-11 16:43:10 UTC; michael
+Packaged: 2026-02-16 08:25:26 UTC; michael
+Author: Michael Bücker [aut, cre] (ORCID:
+    <https://orcid.org/0000-0003-0045-8460>)
+Maintainer: Michael Bücker <michael.buecker@fh-muenster.de>
 Repository: CRAN
-Date/Publication: 2026-02-13 17:30:02 UTC
+Date/Publication: 2026-02-16 09:50:18 UTC
