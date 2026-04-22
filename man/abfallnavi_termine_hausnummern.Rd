@@ -16,15 +16,34 @@ abfallnavi_termine_hausnummern(
 
 \item{fraktion}{Fraction ids.}
 
-\item{safe}{Logical; apply throttling and caching.}
+\item{safe}{Logical; if \code{TRUE} (default), apply rate-limiting and cache
+GET responses to \code{tools::R_user_dir("bunddev", "cache")}.}
 
-\item{refresh}{Logical; refresh cached responses.}
+\item{refresh}{Logical; if \code{TRUE}, ignore cached responses and re-fetch
+from the API (default \code{FALSE}).}
 }
 \value{
-A tibble with collection dates.
-
-Includes \code{date_time} as POSIXct in Europe/Berlin.
+A \link[tibble:tibble]{tibble} with one row per collection date and columns:
+\describe{
+\item{id}{Integer. Collection event identifier.}
+\item{bezirk}{List. District information for this collection.}
+\item{datum}{Character. Collection date (YYYY-MM-DD).}
+\item{date_time}{POSIXct. Parsed collection date (Europe/Berlin).}
+}
 }
 \description{
 List collection dates for a house number
 }
+\seealso{
+Other Abfallnavi: 
+\code{\link{abfallnavi_fraktionen}()},
+\code{\link{abfallnavi_fraktionen_hausnummern}()},
+\code{\link{abfallnavi_fraktionen_strassen}()},
+\code{\link{abfallnavi_hausnummern}()},
+\code{\link{abfallnavi_kalender_download}()},
+\code{\link{abfallnavi_ort}()},
+\code{\link{abfallnavi_orte}()},
+\code{\link{abfallnavi_strassen}()},
+\code{\link{abfallnavi_termine_strassen}()}
+}
+\concept{Abfallnavi}

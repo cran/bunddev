@@ -19,22 +19,32 @@ mudab_parameter_values(
 
 \item{orderby}{Optional ordering specification.}
 
-\item{safe}{Logical; apply throttling and caching.}
+\item{safe}{Logical; if \code{TRUE} (default), apply rate-limiting and cache
+GET responses to \code{tools::R_user_dir("bunddev", "cache")}.}
 
-\item{refresh}{Logical; refresh cached responses.}
+\item{refresh}{Logical; if \code{TRUE}, ignore cached responses and re-fetch
+from the API (default \code{FALSE}).}
 }
 \value{
-A tibble with parameter values.
-
-Includes \code{datetime_time} as POSIXct in Europe/Berlin when date/time fields are
-present.
+A \link[tibble:tibble]{tibble} with one row per measurement value and columns:
+\describe{
+\item{metadataid}{Integer. Metadata identifier.}
+\item{STATNAME_ST}{Character. Station name.}
+\item{STATNAME_DATE_TIME}{Character. Composite station-date-time string.}
+\item{PARAMETERID_PM}{Character. Parameter identifier.}
+\item{PARAMCODE_PM}{Character. Parameter code name.}
+\item{DATE_STM}{Character. Measurement date (YYYYMMDD).}
+\item{TIME_STM}{Character. Measurement time (HHMM).}
+\item{VALUE_MS}{Character. Measured value.}
+\item{datetime_time}{POSIXct. Parsed date-time (Europe/Berlin).}
+}
 }
 \description{
 List MUDAB parameter values
 }
 \details{
 Returns measurement values for parameters from the MUDAB database.
-Official docs: https://mudab.api.bund.dev.
+API documentation: \url{https://mudab.api.bund.dev}.
 }
 \examples{
 \dontrun{
@@ -42,3 +52,17 @@ mudab_parameter_values(range = list(from = 0, count = 5))
 }
 
 }
+\seealso{
+Other MUDAB: 
+\code{\link{mudab_parameters}()},
+\code{\link{mudab_parameters_biologie}()},
+\code{\link{mudab_parameters_biota}()},
+\code{\link{mudab_parameters_sediment}()},
+\code{\link{mudab_parameters_wasser}()},
+\code{\link{mudab_plc_measurements}()},
+\code{\link{mudab_plc_parameters}()},
+\code{\link{mudab_plc_stations}()},
+\code{\link{mudab_project_stations}()},
+\code{\link{mudab_stations}()}
+}
+\concept{MUDAB}

@@ -14,14 +14,51 @@ dip_bundestag_vorgangsposition(
 \arguments{
 \item{vorgangsposition_id}{Vorgangsposition id.}
 
-\item{params}{Query parameters.}
+\item{params}{Named list of query parameters. Common keys:
+\describe{
+\item{format}{Response format (\code{"json"} recommended; default set by adapter).}
+\item{apikey}{Optional API key as query parameter (prefer auth header).}
+\item{fuzzy}{Free-text search string (character).}
+\item{sort}{Sort field/order definition (character).}
+\item{cursor}{Cursor for pagination (character).}
+\item{limit}{Page size/maximum number of documents (integer).}
+}}
 
-\item{safe}{Logical; apply throttling and caching.}
+\item{safe}{Logical; if \code{TRUE} (default), apply rate-limiting and cache
+GET responses to \code{tools::R_user_dir("bunddev", "cache")}.}
 
-\item{refresh}{Logical; refresh cached responses.}
+\item{refresh}{Logical; if \code{TRUE}, ignore cached responses and re-fetch
+from the API (default \code{FALSE}).}
 }
 \value{
-A tibble with Vorgangsposition metadata.
+A one-row tibble for the selected Vorgangsposition:
+\describe{
+\item{id}{Vorgangsposition identifier (character).}
+\item{vorgangsposition}{Step description (character).}
+\item{zuordnung}{Assignment: \code{"BT"}, \code{"BR"}, \code{"BV"}, or \code{"EK"} (character).}
+\item{gang}{Key step in the legislative process (logical).}
+\item{fortsetzung}{Continuation of a previous debate (logical).}
+\item{nachtrag}{Addendum entry (logical).}
+\item{vorgangstyp}{Parent Vorgang type (character).}
+\item{typ}{Entity type, always \code{"Vorgangsposition"} (character).}
+\item{titel}{Title of the parent Vorgang (character).}
+\item{dokumentart}{Document type: \code{"Drucksache"} or \code{"Plenarprotokoll"} (character).}
+\item{vorgang_id}{Parent Vorgang id (character).}
+\item{datum}{Date of associated document (character, ISO date).}
+\item{aktualisiert}{Last update timestamp (character, ISO datetime).}
+\item{fundstelle}{Document reference details (list-column).}
+\item{urheber}{Authoring bodies (list-column).}
+\item{ueberweisung}{Committee referrals (list-column).}
+\item{aktivitaet_anzeige}{Up to 4 associated activities for display (list-column).}
+\item{aktivitaet_anzahl}{Total number of associated activities (integer).}
+\item{ressort}{Government departments involved (list-column).}
+\item{beschlussfassung}{Voting decisions (list-column).}
+\item{ratsdok}{EU Council document number (character or \code{NA}).}
+\item{kom}{EU COM reference number (character or \code{NA}).}
+\item{sek}{EU SEC reference number (character or \code{NA}).}
+\item{mitberaten}{Co-deliberated Vorgangspositionen (list-column).}
+\item{abstract}{Summary text (character or \code{NA}).}
+}
 }
 \description{
 Get a DIP Vorgangsposition
@@ -32,3 +69,24 @@ dip_bundestag_vorgangsposition(173376)
 }
 
 }
+\seealso{
+\code{\link[=bunddev_parameters]{bunddev_parameters()}} to inspect available query parameters.
+
+Other DIP Bundestag: 
+\code{\link{dip_bundestag_aktivitaet}()},
+\code{\link{dip_bundestag_aktivitaet_list}()},
+\code{\link{dip_bundestag_drucksache}()},
+\code{\link{dip_bundestag_drucksache_list}()},
+\code{\link{dip_bundestag_drucksache_text}()},
+\code{\link{dip_bundestag_drucksache_text_list}()},
+\code{\link{dip_bundestag_person}()},
+\code{\link{dip_bundestag_person_list}()},
+\code{\link{dip_bundestag_plenarprotokoll}()},
+\code{\link{dip_bundestag_plenarprotokoll_list}()},
+\code{\link{dip_bundestag_plenarprotokoll_text}()},
+\code{\link{dip_bundestag_plenarprotokoll_text_list}()},
+\code{\link{dip_bundestag_vorgang}()},
+\code{\link{dip_bundestag_vorgang_list}()},
+\code{\link{dip_bundestag_vorgangsposition_list}()}
+}
+\concept{DIP Bundestag}

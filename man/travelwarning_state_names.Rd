@@ -7,21 +7,32 @@
 travelwarning_state_names(safe = TRUE, refresh = FALSE)
 }
 \arguments{
-\item{safe}{Logical; apply throttling and caching.}
+\item{safe}{Logical; if \code{TRUE} (default), apply rate-limiting and cache
+GET responses to \code{tools::R_user_dir("bunddev", "cache")}.}
 
-\item{refresh}{Logical; refresh cached responses.}
+\item{refresh}{Logical; if \code{TRUE}, ignore cached responses and re-fetch
+from the API (default \code{FALSE}).}
 }
 \value{
-A tibble with state name entries.
-
-Includes \code{last_modified_time} as POSIXct in Europe/Berlin.
+A tibble with one row per state-name document:
+\describe{
+\item{content_id}{Character. Entry/content identifier.}
+\item{parent_content_id}{Character. Parent identifier for nested records.}
+\item{response_country}{Character. Country code from response metadata.}
+\item{response_last_modified}{Numeric. Feed-level modification timestamp.}
+\item{response_last_modified_time}{POSIXct. Parsed feed-level timestamp.}
+\item{last_modified_time}{POSIXct. Entry-level modification timestamp.}
+\item{effective_time}{POSIXct. Entry effective timestamp.}
+\item{last_modified}{Numeric. Raw entry modification timestamp in ms.}
+\item{name}{Character. Document name.}
+\item{url}{Character. Download URL.}
+}
 }
 \description{
 List state names documents
 }
 \details{
-Returns documents with state name information. Official docs:
-https://travelwarning.api.bund.dev.
+Returns documents with state name information. API documentation: \url{https://travelwarning.api.bund.dev}.
 }
 \examples{
 \dontrun{
@@ -29,3 +40,12 @@ travelwarning_state_names()
 }
 
 }
+\seealso{
+Other Travelwarning: 
+\code{\link{travelwarning_healthcare}()},
+\code{\link{travelwarning_representatives_country}()},
+\code{\link{travelwarning_representatives_germany}()},
+\code{\link{travelwarning_warning}()},
+\code{\link{travelwarning_warnings}()}
+}
+\concept{Travelwarning}

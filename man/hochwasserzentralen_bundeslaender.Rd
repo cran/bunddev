@@ -7,20 +7,25 @@
 hochwasserzentralen_bundeslaender(safe = TRUE, refresh = FALSE)
 }
 \arguments{
-\item{safe}{Logical; apply throttling and caching.}
+\item{safe}{Logical; if \code{TRUE} (default), apply rate-limiting and cache
+GET responses to \code{tools::R_user_dir("bunddev", "cache")}.}
 
-\item{refresh}{Logical; refresh cached responses.}
+\item{refresh}{Logical; if \code{TRUE}, ignore cached responses and re-fetch
+from the API (default \code{FALSE}).}
 }
 \value{
-A tibble with Bundesland metadata.
+A tibble with one row per Bundesland/region entry. Columns are created
+dynamically from the upstream service response fields. If the response
+contains GeoJSON features, each feature's \code{properties} are used as columns;
+otherwise each top-level field becomes a column. Scalar values become atomic
+columns and nested structures become list-columns.
 }
 \description{
 List flood portal states and connected regions
 }
 \details{
 Returns metadata for all Bundeslaender and connected regions in the
-hochwasserzentralen.de portal. Official docs:
-https://bundesapi.github.io/hochwasserzentralen-api/.
+hochwasserzentralen.de portal. API documentation: \url{https://hochwasserzentralen.api.bund.dev/}.
 }
 \examples{
 \dontrun{
@@ -28,3 +33,11 @@ hochwasserzentralen_bundeslaender()
 }
 
 }
+\seealso{
+Other Hochwasserzentralen: 
+\code{\link{hochwasserzentralen_bundesland_geojson}()},
+\code{\link{hochwasserzentralen_bundesland_info}()},
+\code{\link{hochwasserzentralen_lagepegel}()},
+\code{\link{hochwasserzentralen_pegel_info}()}
+}
+\concept{Hochwasserzentralen}

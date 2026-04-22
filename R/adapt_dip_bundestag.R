@@ -1,11 +1,30 @@
 #' List DIP Vorgang entries
 #'
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
-#' @param flatten Logical; drop nested list columns.
-#' @param flatten_mode Flatten strategy for list columns. Use "unnest" to
-#'   expand list-columns into multiple rows.
+#' @param params Named list of query parameters. Common keys:
+#'   \describe{
+#'     \item{format}{Response format (`"json"` recommended; default set by adapter).}
+#'     \item{apikey}{Optional API key as query parameter (prefer auth header).}
+#'     \item{fuzzy}{Free-text search string (character).}
+#'     \item{sort}{Sort field/order definition (character).}
+#'     \item{cursor}{Cursor for pagination (character).}
+#'     \item{limit}{Page size/maximum number of documents (integer).}
+#'   }
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
+#' @param flatten Logical; if `TRUE`, simplify nested list columns according to
+#'   `flatten_mode`. Default `FALSE` keeps list columns as-is.
+#' @param flatten_mode How to handle list columns when `flatten = TRUE`:
+#'   \describe{
+#'     \item{`"drop"`}{Remove list columns entirely. Use when nested data is not
+#'       needed.}
+#'     \item{`"json"`}{Convert each list element to a JSON string. Preserves all
+#'       data in a text-queryable format. This is the **default**.}
+#'     \item{`"unnest"`}{Expand list columns into multiple rows via
+#'       [tidyr::unnest_longer()]. **Warning:** this can significantly increase
+#'       the number of rows.}
+#'   }
 #'
 #' @details
 #' Returns metadata for DIP Vorgang entries. Requires an API key. Obtain a key
@@ -15,6 +34,7 @@
 #' `DIP_BUNDESTAG_API_KEY` environment variable directly.
 #'
 #' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
 #' [bunddev_auth_set()] to configure authentication.
 #'
 #' @examples
@@ -30,7 +50,35 @@
 #' dip_bundestag_vorgang_list()
 #' }
 #'
-#' @return A tibble with DIP response metadata.
+#' @return A [tibble][tibble::tibble] with one row per Vorgang and columns:
+#'   \describe{
+#'     \item{id}{Character. Unique Vorgang identifier.}
+#'     \item{typ}{Character. Entity type, always `"Vorgang"`.}
+#'     \item{beratungsstand}{Character. Consultation status.}
+#'     \item{vorgangstyp}{Character. Vorgang type.}
+#'     \item{wahlperiode}{Integer. Legislative period.}
+#'     \item{datum}{Character. Date of last associated document.}
+#'     \item{aktualisiert}{Character. Last update timestamp.}
+#'     \item{titel}{Character. Title text.}
+#'     \item{abstract}{Character. Summary text.}
+#'     \item{gesta}{Character. GESTA reference number.}
+#'     \item{kom}{Character. EU COM reference number.}
+#'     \item{ratsdok}{Character. EU Council document number.}
+#'     \item{archiv}{Character. Archive reference.}
+#'     \item{mitteilung}{Character. Supplementary note.}
+#'     \item{sek}{Character. EU SEC reference number.}
+#'     \item{initiative}{List. Initiating factions or bodies.}
+#'     \item{sachgebiet}{List. Subject areas.}
+#'     \item{deskriptor}{List. Thesaurus descriptor entries.}
+#'     \item{zustimmungsbeduerftigkeit}{List. Consent requirements.}
+#'     \item{verkuendung}{List. Promulgation details.}
+#'     \item{inkrafttreten}{List. Entry-into-force details.}
+#'     \item{vorgang_verlinkung}{List. Linked Vorgaenge.}
+#'   }
+#'
+#' Wrapped in a one-row tibble with `num_found` (integer), `cursor`
+#' (character), and `documents` (list-column) when not yet unpacked.
+#' @family DIP Bundestag
 #' @export
 dip_bundestag_vorgang_list <- function(params = list(),
                                        safe = TRUE,
@@ -44,19 +92,48 @@ dip_bundestag_vorgang_list <- function(params = list(),
 #' Get a DIP Vorgang
 #'
 #' @param vorgang_id Vorgang id.
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @inheritParams dip_bundestag_vorgang_list
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
 #' Returns metadata for a single Vorgang.
 #'
+#' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
 #' @examples
 #' \dontrun{
 #' dip_bundestag_vorgang(84343)
 #' }
 #'
-#' @return A tibble with Vorgang metadata.
+#' @return A one-row tibble for the selected Vorgang:
+#' \describe{
+#'   \item{id}{Vorgang identifier (character).}
+#'   \item{typ}{Entity type, always `"Vorgang"` (character).}
+#'   \item{beratungsstand}{Consultation status, e.g. `"Abgeschlossen"` (character).}
+#'   \item{vorgangstyp}{Vorgang type, e.g. `"Geschäftsordnung"` (character).}
+#'   \item{wahlperiode}{Legislative period (integer).}
+#'   \item{initiative}{Initiating factions/bodies (list-column).}
+#'   \item{datum}{Date of most recent associated document (character, ISO date).}
+#'   \item{aktualisiert}{Last update timestamp (character, ISO datetime).}
+#'   \item{titel}{Title (character).}
+#'   \item{abstract}{Summary text (character or `NA`).}
+#'   \item{sachgebiet}{Subject areas (list-column).}
+#'   \item{deskriptor}{Thesaurus descriptors (list-column of named lists).}
+#'   \item{gesta}{GESTA reference number (character or `NA`).}
+#'   \item{zustimmungsbeduerftigkeit}{Consent requirements (list-column).}
+#'   \item{kom}{EU COM reference number (character or `NA`).}
+#'   \item{ratsdok}{EU Council document number (character or `NA`).}
+#'   \item{verkuendung}{Promulgation details (list-column).}
+#'   \item{inkrafttreten}{Entry-into-force details (list-column).}
+#'   \item{archiv}{Archive reference (character or `NA`).}
+#'   \item{mitteilung}{Supplementary note (character or `NA`).}
+#'   \item{vorgang_verlinkung}{Linked Vorgänge (list-column).}
+#'   \item{sek}{EU SEC reference number (character or `NA`).}
+#' }
+#' @family DIP Bundestag
 #' @export
 dip_bundestag_vorgang <- function(vorgang_id,
                                   params = list(),
@@ -73,22 +150,66 @@ dip_bundestag_vorgang <- function(vorgang_id,
 
 #' List DIP Vorgangsposition entries
 #'
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
-#' @param flatten Logical; drop nested list columns.
-#' @param flatten_mode Flatten strategy for list columns. Use "unnest" to
-#'   expand list-columns into multiple rows.
+#' @inheritParams dip_bundestag_vorgang_list
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
+#' @param flatten Logical; if `TRUE`, simplify nested list columns according to
+#'   `flatten_mode`. Default `FALSE` keeps list columns as-is.
+#' @param flatten_mode How to handle list columns when `flatten = TRUE`:
+#'   \describe{
+#'     \item{`"drop"`}{Remove list columns entirely. Use when nested data is not
+#'       needed.}
+#'     \item{`"json"`}{Convert each list element to a JSON string. Preserves all
+#'       data in a text-queryable format. This is the **default**.}
+#'     \item{`"unnest"`}{Expand list columns into multiple rows via
+#'       [tidyr::unnest_longer()]. **Warning:** this can significantly increase
+#'       the number of rows.}
+#'   }
 #'
 #' @details
 #' Returns metadata for Vorgangsposition entries.
 #'
+#' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
 #' @examples
 #' \dontrun{
 #' dip_bundestag_vorgangsposition_list()
 #' }
 #'
-#' @return A tibble with DIP response metadata.
+#' @return A [tibble][tibble::tibble] with one row per Vorgangsposition and columns:
+#'   \describe{
+#'     \item{id}{Character. Unique Vorgangsposition identifier.}
+#'     \item{vorgangsposition}{Character. Step description.}
+#'     \item{gang}{Logical. Key step in legislative process.}
+#'     \item{fortsetzung}{Logical. Continuation of prior debate.}
+#'     \item{nachtrag}{Logical. Addendum entry.}
+#'     \item{vorgangstyp}{Character. Parent Vorgang type.}
+#'     \item{typ}{Character. Entity type, always `"Vorgangsposition"`.}
+#'     \item{titel}{Character. Title of the parent Vorgang.}
+#'     \item{dokumentart}{Character. Document type.}
+#'     \item{vorgang_id}{Character. Parent Vorgang identifier.}
+#'     \item{datum}{Character. Date of associated document.}
+#'     \item{aktualisiert}{Character. Last update timestamp.}
+#'     \item{aktivitaet_anzahl}{Integer. Total associated activities.}
+#'     \item{ratsdok}{Character. EU Council document number.}
+#'     \item{kom}{Character. EU COM reference number.}
+#'     \item{sek}{Character. EU SEC reference number.}
+#'     \item{abstract}{Character. Summary text.}
+#'     \item{zuordnung}{List. Assignment to BT/BR/BV/EK.}
+#'     \item{fundstelle}{List. Document reference details.}
+#'     \item{urheber}{List. Authoring bodies.}
+#'     \item{ueberweisung}{List. Committee referrals.}
+#'     \item{aktivitaet_anzeige}{List. Up to 4 display activities.}
+#'     \item{ressort}{List. Government departments involved.}
+#'     \item{beschlussfassung}{List. Voting decisions.}
+#'     \item{mitberaten}{List. Co-deliberated Vorgangspositionen.}
+#'   }
+#'
+#' Wrapped in a one-row tibble with `num_found` (integer), `cursor`
+#' (character), and `documents` (list-column) when not yet unpacked.
+#' @family DIP Bundestag
 #' @export
 dip_bundestag_vorgangsposition_list <- function(params = list(),
                                                 safe = TRUE,
@@ -102,16 +223,48 @@ dip_bundestag_vorgangsposition_list <- function(params = list(),
 #' Get a DIP Vorgangsposition
 #'
 #' @param vorgangsposition_id Vorgangsposition id.
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @inheritParams dip_bundestag_vorgang_list
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
+#' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
 #' @examples
 #' \dontrun{
 #' dip_bundestag_vorgangsposition(173376)
 #' }
 #'
-#' @return A tibble with Vorgangsposition metadata.
+#' @return A one-row tibble for the selected Vorgangsposition:
+#' \describe{
+#'   \item{id}{Vorgangsposition identifier (character).}
+#'   \item{vorgangsposition}{Step description (character).}
+#'   \item{zuordnung}{Assignment: `"BT"`, `"BR"`, `"BV"`, or `"EK"` (character).}
+#'   \item{gang}{Key step in the legislative process (logical).}
+#'   \item{fortsetzung}{Continuation of a previous debate (logical).}
+#'   \item{nachtrag}{Addendum entry (logical).}
+#'   \item{vorgangstyp}{Parent Vorgang type (character).}
+#'   \item{typ}{Entity type, always `"Vorgangsposition"` (character).}
+#'   \item{titel}{Title of the parent Vorgang (character).}
+#'   \item{dokumentart}{Document type: `"Drucksache"` or `"Plenarprotokoll"` (character).}
+#'   \item{vorgang_id}{Parent Vorgang id (character).}
+#'   \item{datum}{Date of associated document (character, ISO date).}
+#'   \item{aktualisiert}{Last update timestamp (character, ISO datetime).}
+#'   \item{fundstelle}{Document reference details (list-column).}
+#'   \item{urheber}{Authoring bodies (list-column).}
+#'   \item{ueberweisung}{Committee referrals (list-column).}
+#'   \item{aktivitaet_anzeige}{Up to 4 associated activities for display (list-column).}
+#'   \item{aktivitaet_anzahl}{Total number of associated activities (integer).}
+#'   \item{ressort}{Government departments involved (list-column).}
+#'   \item{beschlussfassung}{Voting decisions (list-column).}
+#'   \item{ratsdok}{EU Council document number (character or `NA`).}
+#'   \item{kom}{EU COM reference number (character or `NA`).}
+#'   \item{sek}{EU SEC reference number (character or `NA`).}
+#'   \item{mitberaten}{Co-deliberated Vorgangspositionen (list-column).}
+#'   \item{abstract}{Summary text (character or `NA`).}
+#' }
+#' @family DIP Bundestag
 #' @export
 dip_bundestag_vorgangsposition <- function(vorgangsposition_id,
                                            params = list(),
@@ -128,19 +281,57 @@ dip_bundestag_vorgangsposition <- function(vorgangsposition_id,
 
 #' List DIP Drucksachen
 #'
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
-#' @param flatten Logical; drop nested list columns.
-#' @param flatten_mode Flatten strategy for list columns. Use "unnest" to
-#'   expand list-columns into multiple rows.
+#' @inheritParams dip_bundestag_vorgang_list
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
+#' @param flatten Logical; if `TRUE`, simplify nested list columns according to
+#'   `flatten_mode`. Default `FALSE` keeps list columns as-is.
+#' @param flatten_mode How to handle list columns when `flatten = TRUE`:
+#'   \describe{
+#'     \item{`"drop"`}{Remove list columns entirely. Use when nested data is not
+#'       needed.}
+#'     \item{`"json"`}{Convert each list element to a JSON string. Preserves all
+#'       data in a text-queryable format. This is the **default**.}
+#'     \item{`"unnest"`}{Expand list columns into multiple rows via
+#'       [tidyr::unnest_longer()]. **Warning:** this can significantly increase
+#'       the number of rows.}
+#'   }
 #'
+#' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
 #' @examples
 #' \dontrun{
 #' dip_bundestag_drucksache_list()
 #' }
 #'
-#' @return A tibble with DIP response metadata.
+#' @return A [tibble][tibble::tibble] with one row per Drucksache and columns:
+#'   \describe{
+#'     \item{id}{Character. Unique Drucksache identifier.}
+#'     \item{typ}{Character. Entity type, always `"Dokument"`.}
+#'     \item{dokumentart}{Character. Document type, always `"Drucksache"`.}
+#'     \item{drucksachetyp}{Character. Drucksache subtype.}
+#'     \item{dokumentnummer}{Character. Document number.}
+#'     \item{wahlperiode}{Integer. Legislative period.}
+#'     \item{herausgeber}{Character. Publisher: `"BT"` or `"BR"`.}
+#'     \item{datum}{Character. Publication date.}
+#'     \item{aktualisiert}{Character. Last update timestamp.}
+#'     \item{titel}{Character. Title text.}
+#'     \item{autoren_anzahl}{Integer. Total author count.}
+#'     \item{pdf_hash}{Character. MD5 checksum of PDF file.}
+#'     \item{vorgangsbezug_anzahl}{Integer. Total related Vorgaenge.}
+#'     \item{anlagen}{Character. Appendix description.}
+#'     \item{autoren_anzeige}{List. Up to 4 display authors.}
+#'     \item{fundstelle}{List. Document reference details.}
+#'     \item{urheber}{List. Authoring bodies.}
+#'     \item{vorgangsbezug}{List. Related Vorgaenge.}
+#'     \item{ressort}{List. Government departments involved.}
+#'   }
+#'
+#' Wrapped in a one-row tibble with `num_found` (integer), `cursor`
+#' (character), and `documents` (list-column) when not yet unpacked.
+#' @family DIP Bundestag
 #' @export
 dip_bundestag_drucksache_list <- function(params = list(),
                                           safe = TRUE,
@@ -154,16 +345,42 @@ dip_bundestag_drucksache_list <- function(params = list(),
 #' Get a DIP Drucksache
 #'
 #' @param drucksache_id Drucksache id.
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @inheritParams dip_bundestag_vorgang_list
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
+#' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
 #' @examples
 #' \dontrun{
 #' dip_bundestag_drucksache(68852)
 #' }
 #'
-#' @return A tibble with Drucksache metadata.
+#' @return A one-row tibble for the selected Drucksache:
+#' \describe{
+#'   \item{id}{Drucksache identifier (character).}
+#'   \item{typ}{Entity type, always `"Dokument"` (character).}
+#'   \item{dokumentart}{Document type, always `"Drucksache"` (character).}
+#'   \item{drucksachetyp}{Drucksache subtype, e.g. `"Antrag"` (character).}
+#'   \item{dokumentnummer}{Document number, e.g. `"19/1"` (character).}
+#'   \item{wahlperiode}{Legislative period (integer).}
+#'   \item{herausgeber}{Publisher: `"BT"` or `"BR"` (character).}
+#'   \item{datum}{Publication date (character, ISO date).}
+#'   \item{aktualisiert}{Last update timestamp (character, ISO datetime).}
+#'   \item{titel}{Title (character).}
+#'   \item{autoren_anzeige}{Up to 4 authors for display (list-column).}
+#'   \item{autoren_anzahl}{Total author count (integer).}
+#'   \item{fundstelle}{Document reference details (list-column).}
+#'   \item{pdf_hash}{MD5 checksum of the PDF file (character or `NA`).}
+#'   \item{urheber}{Authoring bodies (list-column).}
+#'   \item{vorgangsbezug}{Up to 4 related Vorgänge (list-column).}
+#'   \item{vorgangsbezug_anzahl}{Total number of related Vorgänge (integer).}
+#'   \item{ressort}{Government departments involved (list-column).}
+#'   \item{anlagen}{Appendix description (character or `NA`).}
+#' }
+#' @family DIP Bundestag
 #' @export
 dip_bundestag_drucksache <- function(drucksache_id,
                                      params = list(),
@@ -180,19 +397,58 @@ dip_bundestag_drucksache <- function(drucksache_id,
 
 #' List DIP Drucksache texts
 #'
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
-#' @param flatten Logical; drop nested list columns.
-#' @param flatten_mode Flatten strategy for list columns. Use "unnest" to
-#'   expand list-columns into multiple rows.
+#' @inheritParams dip_bundestag_vorgang_list
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
+#' @param flatten Logical; if `TRUE`, simplify nested list columns according to
+#'   `flatten_mode`. Default `FALSE` keeps list columns as-is.
+#' @param flatten_mode How to handle list columns when `flatten = TRUE`:
+#'   \describe{
+#'     \item{`"drop"`}{Remove list columns entirely. Use when nested data is not
+#'       needed.}
+#'     \item{`"json"`}{Convert each list element to a JSON string. Preserves all
+#'       data in a text-queryable format. This is the **default**.}
+#'     \item{`"unnest"`}{Expand list columns into multiple rows via
+#'       [tidyr::unnest_longer()]. **Warning:** this can significantly increase
+#'       the number of rows.}
+#'   }
 #'
+#' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
 #' @examples
 #' \dontrun{
 #' dip_bundestag_drucksache_text_list()
 #' }
 #'
-#' @return A tibble with DIP response metadata.
+#' @return A [tibble][tibble::tibble] with one row per Drucksache text and columns:
+#'   \describe{
+#'     \item{id}{Character. Unique Drucksache identifier.}
+#'     \item{typ}{Character. Entity type, always `"Dokument"`.}
+#'     \item{dokumentart}{Character. Document type, always `"Drucksache"`.}
+#'     \item{drucksachetyp}{Character. Drucksache subtype.}
+#'     \item{dokumentnummer}{Character. Document number.}
+#'     \item{wahlperiode}{Integer. Legislative period.}
+#'     \item{herausgeber}{Character. Publisher: `"BT"` or `"BR"`.}
+#'     \item{datum}{Character. Publication date.}
+#'     \item{aktualisiert}{Character. Last update timestamp.}
+#'     \item{titel}{Character. Title text.}
+#'     \item{autoren_anzahl}{Integer. Total author count.}
+#'     \item{pdf_hash}{Character. MD5 checksum of PDF file.}
+#'     \item{vorgangsbezug_anzahl}{Integer. Total related Vorgaenge.}
+#'     \item{anlagen}{Character. Appendix description.}
+#'     \item{text}{Character. Full document text.}
+#'     \item{autoren_anzeige}{List. Up to 4 display authors.}
+#'     \item{fundstelle}{List. Document reference details.}
+#'     \item{urheber}{List. Authoring bodies.}
+#'     \item{vorgangsbezug}{List. Related Vorgaenge.}
+#'     \item{ressort}{List. Government departments involved.}
+#'   }
+#'
+#' Wrapped in a one-row tibble with `num_found` (integer), `cursor`
+#' (character), and `documents` (list-column) when not yet unpacked.
+#' @family DIP Bundestag
 #' @export
 dip_bundestag_drucksache_text_list <- function(params = list(),
                                                safe = TRUE,
@@ -206,16 +462,25 @@ dip_bundestag_drucksache_text_list <- function(params = list(),
 #' Get a DIP Drucksache text
 #'
 #' @param drucksache_id Drucksache id.
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @inheritParams dip_bundestag_vorgang_list
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
+#' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
 #' @examples
 #' \dontrun{
 #' dip_bundestag_drucksache_text(68852)
 #' }
 #'
-#' @return A tibble with Drucksache text metadata.
+#' @return A one-row tibble for the selected Drucksache text record.
+#' Contains all columns from [dip_bundestag_drucksache()] plus:
+#' \describe{
+#'   \item{text}{Full document text (character).}
+#' }
+#' @family DIP Bundestag
 #' @export
 dip_bundestag_drucksache_text <- function(drucksache_id,
                                           params = list(),
@@ -232,19 +497,52 @@ dip_bundestag_drucksache_text <- function(drucksache_id,
 
 #' List DIP Plenarprotokolle
 #'
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
-#' @param flatten Logical; drop nested list columns.
-#' @param flatten_mode Flatten strategy for list columns. Use "unnest" to
-#'   expand list-columns into multiple rows.
+#' @inheritParams dip_bundestag_vorgang_list
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
+#' @param flatten Logical; if `TRUE`, simplify nested list columns according to
+#'   `flatten_mode`. Default `FALSE` keeps list columns as-is.
+#' @param flatten_mode How to handle list columns when `flatten = TRUE`:
+#'   \describe{
+#'     \item{`"drop"`}{Remove list columns entirely. Use when nested data is not
+#'       needed.}
+#'     \item{`"json"`}{Convert each list element to a JSON string. Preserves all
+#'       data in a text-queryable format. This is the **default**.}
+#'     \item{`"unnest"`}{Expand list columns into multiple rows via
+#'       [tidyr::unnest_longer()]. **Warning:** this can significantly increase
+#'       the number of rows.}
+#'   }
 #'
+#' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
 #' @examples
 #' \dontrun{
 #' dip_bundestag_plenarprotokoll_list()
 #' }
 #'
-#' @return A tibble with DIP response metadata.
+#' @return A [tibble][tibble::tibble] with one row per Plenarprotokoll and columns:
+#'   \describe{
+#'     \item{id}{Character. Unique Plenarprotokoll identifier.}
+#'     \item{dokumentart}{Character. Document type, always `"Plenarprotokoll"`.}
+#'     \item{typ}{Character. Entity type, always `"Dokument"`.}
+#'     \item{dokumentnummer}{Character. Document number.}
+#'     \item{wahlperiode}{Integer. Legislative period.}
+#'     \item{datum}{Character. Session date.}
+#'     \item{aktualisiert}{Character. Last update timestamp.}
+#'     \item{titel}{Character. Title text.}
+#'     \item{pdf_hash}{Character. MD5 checksum of PDF file.}
+#'     \item{vorgangsbezug_anzahl}{Integer. Total related Vorgaenge.}
+#'     \item{sitzungsbemerkung}{Character. Session remark.}
+#'     \item{herausgeber}{List. Publisher assignment.}
+#'     \item{fundstelle}{List. Document reference details.}
+#'     \item{vorgangsbezug}{List. Related Vorgaenge.}
+#'   }
+#'
+#' Wrapped in a one-row tibble with `num_found` (integer), `cursor`
+#' (character), and `documents` (list-column) when not yet unpacked.
+#' @family DIP Bundestag
 #' @export
 dip_bundestag_plenarprotokoll_list <- function(params = list(),
                                                safe = TRUE,
@@ -258,16 +556,37 @@ dip_bundestag_plenarprotokoll_list <- function(params = list(),
 #' Get a DIP Plenarprotokoll
 #'
 #' @param plenarprotokoll_id Plenarprotokoll id.
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @inheritParams dip_bundestag_vorgang_list
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
+#' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
 #' @examples
 #' \dontrun{
 #' dip_bundestag_plenarprotokoll(908)
 #' }
 #'
-#' @return A tibble with Plenarprotokoll metadata.
+#' @return A one-row tibble for the selected Plenarprotokoll:
+#' \describe{
+#'   \item{id}{Plenarprotokoll identifier (character).}
+#'   \item{dokumentart}{Document type, always `"Plenarprotokoll"` (character).}
+#'   \item{typ}{Entity type, always `"Dokument"` (character).}
+#'   \item{dokumentnummer}{Document number, e.g. `"19/1"` (character).}
+#'   \item{wahlperiode}{Legislative period (integer).}
+#'   \item{herausgeber}{Publisher assignment (character).}
+#'   \item{datum}{Session date (character, ISO date).}
+#'   \item{aktualisiert}{Last update timestamp (character, ISO datetime).}
+#'   \item{titel}{Title (character).}
+#'   \item{fundstelle}{Document reference details (list-column).}
+#'   \item{pdf_hash}{MD5 checksum of the PDF file (character or `NA`).}
+#'   \item{vorgangsbezug}{Up to 4 related Vorgänge (list-column).}
+#'   \item{vorgangsbezug_anzahl}{Total number of related Vorgänge (integer).}
+#'   \item{sitzungsbemerkung}{Session remark, e.g. `"Sondersitzung"` (character or `NA`).}
+#' }
+#' @family DIP Bundestag
 #' @export
 dip_bundestag_plenarprotokoll <- function(plenarprotokoll_id,
                                           params = list(),
@@ -284,19 +603,53 @@ dip_bundestag_plenarprotokoll <- function(plenarprotokoll_id,
 
 #' List DIP Plenarprotokoll texts
 #'
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
-#' @param flatten Logical; drop nested list columns.
-#' @param flatten_mode Flatten strategy for list columns. Use "unnest" to
-#'   expand list-columns into multiple rows.
+#' @inheritParams dip_bundestag_vorgang_list
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
+#' @param flatten Logical; if `TRUE`, simplify nested list columns according to
+#'   `flatten_mode`. Default `FALSE` keeps list columns as-is.
+#' @param flatten_mode How to handle list columns when `flatten = TRUE`:
+#'   \describe{
+#'     \item{`"drop"`}{Remove list columns entirely. Use when nested data is not
+#'       needed.}
+#'     \item{`"json"`}{Convert each list element to a JSON string. Preserves all
+#'       data in a text-queryable format. This is the **default**.}
+#'     \item{`"unnest"`}{Expand list columns into multiple rows via
+#'       [tidyr::unnest_longer()]. **Warning:** this can significantly increase
+#'       the number of rows.}
+#'   }
 #'
+#' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
 #' @examples
 #' \dontrun{
 #' dip_bundestag_plenarprotokoll_text_list()
 #' }
 #'
-#' @return A tibble with DIP response metadata.
+#' @return A [tibble][tibble::tibble] with one row per Plenarprotokoll text and columns:
+#'   \describe{
+#'     \item{id}{Character. Unique Plenarprotokoll identifier.}
+#'     \item{dokumentart}{Character. Document type, always `"Plenarprotokoll"`.}
+#'     \item{typ}{Character. Entity type, always `"Dokument"`.}
+#'     \item{dokumentnummer}{Character. Document number.}
+#'     \item{wahlperiode}{Integer. Legislative period.}
+#'     \item{datum}{Character. Session date.}
+#'     \item{aktualisiert}{Character. Last update timestamp.}
+#'     \item{titel}{Character. Title text.}
+#'     \item{pdf_hash}{Character. MD5 checksum of PDF file.}
+#'     \item{vorgangsbezug_anzahl}{Integer. Total related Vorgaenge.}
+#'     \item{sitzungsbemerkung}{Character. Session remark.}
+#'     \item{text}{Character. Full document text.}
+#'     \item{herausgeber}{List. Publisher assignment.}
+#'     \item{fundstelle}{List. Document reference details.}
+#'     \item{vorgangsbezug}{List. Related Vorgaenge.}
+#'   }
+#'
+#' Wrapped in a one-row tibble with `num_found` (integer), `cursor`
+#' (character), and `documents` (list-column) when not yet unpacked.
+#' @family DIP Bundestag
 #' @export
 dip_bundestag_plenarprotokoll_text_list <- function(params = list(),
                                                     safe = TRUE,
@@ -310,16 +663,25 @@ dip_bundestag_plenarprotokoll_text_list <- function(params = list(),
 #' Get a DIP Plenarprotokoll text
 #'
 #' @param plenarprotokoll_id Plenarprotokoll id.
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @inheritParams dip_bundestag_vorgang_list
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
+#' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
 #' @examples
 #' \dontrun{
 #' dip_bundestag_plenarprotokoll_text(908)
 #' }
 #'
-#' @return A tibble with Plenarprotokoll text metadata.
+#' @return A one-row tibble for the selected Plenarprotokoll text record.
+#' Contains all columns from [dip_bundestag_plenarprotokoll()] plus:
+#' \describe{
+#'   \item{text}{Full document text (character).}
+#' }
+#' @family DIP Bundestag
 #' @export
 dip_bundestag_plenarprotokoll_text <- function(plenarprotokoll_id,
                                                params = list(),
@@ -336,19 +698,51 @@ dip_bundestag_plenarprotokoll_text <- function(plenarprotokoll_id,
 
 #' List DIP Aktivitäten
 #'
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
-#' @param flatten Logical; drop nested list columns.
-#' @param flatten_mode Flatten strategy for list columns. Use "unnest" to
-#'   expand list-columns into multiple rows.
+#' @inheritParams dip_bundestag_vorgang_list
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
+#' @param flatten Logical; if `TRUE`, simplify nested list columns according to
+#'   `flatten_mode`. Default `FALSE` keeps list columns as-is.
+#' @param flatten_mode How to handle list columns when `flatten = TRUE`:
+#'   \describe{
+#'     \item{`"drop"`}{Remove list columns entirely. Use when nested data is not
+#'       needed.}
+#'     \item{`"json"`}{Convert each list element to a JSON string. Preserves all
+#'       data in a text-queryable format. This is the **default**.}
+#'     \item{`"unnest"`}{Expand list columns into multiple rows via
+#'       [tidyr::unnest_longer()]. **Warning:** this can significantly increase
+#'       the number of rows.}
+#'   }
 #'
+#' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
 #' @examples
 #' \dontrun{
 #' dip_bundestag_aktivitaet_list()
 #' }
 #'
-#' @return A tibble with DIP response metadata.
+#' @return A [tibble][tibble::tibble] with one row per Aktivitaet and columns:
+#'   \describe{
+#'     \item{id}{Character. Unique Aktivitaet identifier.}
+#'     \item{aktivitaetsart}{Character. Activity type.}
+#'     \item{typ}{Character. Entity type, always `"Aktivitaet"`.}
+#'     \item{dokumentart}{Character. Document type.}
+#'     \item{wahlperiode}{Integer. Legislative period.}
+#'     \item{datum}{Character. Date of associated document.}
+#'     \item{aktualisiert}{Character. Last update timestamp.}
+#'     \item{titel}{Character. Title text.}
+#'     \item{vorgangsbezug_anzahl}{Integer. Total related Vorgaenge.}
+#'     \item{abstract}{Character. Summary text.}
+#'     \item{fundstelle}{List. Document reference details.}
+#'     \item{vorgangsbezug}{List. Related Vorgaenge.}
+#'     \item{deskriptor}{List. Thesaurus descriptor entries.}
+#'   }
+#'
+#' Wrapped in a one-row tibble with `num_found` (integer), `cursor`
+#' (character), and `documents` (list-column) when not yet unpacked.
+#' @family DIP Bundestag
 #' @export
 dip_bundestag_aktivitaet_list <- function(params = list(),
                                           safe = TRUE,
@@ -362,16 +756,36 @@ dip_bundestag_aktivitaet_list <- function(params = list(),
 #' Get a DIP Aktivität
 #'
 #' @param aktivitaet_id Aktivität id.
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @inheritParams dip_bundestag_vorgang_list
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
+#' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
 #' @examples
 #' \dontrun{
 #' dip_bundestag_aktivitaet(1493545)
 #' }
 #'
-#' @return A tibble with Aktivität metadata.
+#' @return A one-row tibble for the selected Aktivitaet:
+#' \describe{
+#'   \item{id}{Aktivitaet identifier (character).}
+#'   \item{aktivitaetsart}{Activity type, e.g. `"Rede"` (character).}
+#'   \item{typ}{Entity type, always `"Aktivität"` (character).}
+#'   \item{dokumentart}{Document type: `"Drucksache"` or `"Plenarprotokoll"` (character).}
+#'   \item{wahlperiode}{Legislative period (integer).}
+#'   \item{datum}{Date of associated document (character, ISO date).}
+#'   \item{aktualisiert}{Last update timestamp (character, ISO datetime).}
+#'   \item{titel}{Title (character).}
+#'   \item{fundstelle}{Document reference details (list-column).}
+#'   \item{vorgangsbezug}{Up to 4 related Vorgänge (list-column).}
+#'   \item{vorgangsbezug_anzahl}{Total number of related Vorgänge (integer).}
+#'   \item{deskriptor}{Thesaurus descriptors (list-column).}
+#'   \item{abstract}{Summary text (character or `NA`).}
+#' }
+#' @family DIP Bundestag
 #' @export
 dip_bundestag_aktivitaet <- function(aktivitaet_id,
                                      params = list(),
@@ -388,19 +802,49 @@ dip_bundestag_aktivitaet <- function(aktivitaet_id,
 
 #' List DIP Personen
 #'
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
-#' @param flatten Logical; drop nested list columns.
-#' @param flatten_mode Flatten strategy for list columns. Use "unnest" to
-#'   expand list-columns into multiple rows.
+#' @inheritParams dip_bundestag_vorgang_list
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
+#' @param flatten Logical; if `TRUE`, simplify nested list columns according to
+#'   `flatten_mode`. Default `FALSE` keeps list columns as-is.
+#' @param flatten_mode How to handle list columns when `flatten = TRUE`:
+#'   \describe{
+#'     \item{`"drop"`}{Remove list columns entirely. Use when nested data is not
+#'       needed.}
+#'     \item{`"json"`}{Convert each list element to a JSON string. Preserves all
+#'       data in a text-queryable format. This is the **default**.}
+#'     \item{`"unnest"`}{Expand list columns into multiple rows via
+#'       [tidyr::unnest_longer()]. **Warning:** this can significantly increase
+#'       the number of rows.}
+#'   }
 #'
+#' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
 #' @examples
 #' \dontrun{
 #' dip_bundestag_person_list()
 #' }
 #'
-#' @return A tibble with DIP response metadata.
+#' @return A [tibble][tibble::tibble] with one row per Person and columns:
+#'   \describe{
+#'     \item{id}{Character. Unique person identifier.}
+#'     \item{nachname}{Character. Last name.}
+#'     \item{vorname}{Character. First name.}
+#'     \item{namenszusatz}{Character. Name affix.}
+#'     \item{typ}{Character. Entity type, always `"Person"`.}
+#'     \item{wahlperiode}{Integer. Legislative period of first document.}
+#'     \item{basisdatum}{Character. Date of first associated document.}
+#'     \item{datum}{Character. Date of most recent document.}
+#'     \item{aktualisiert}{Character. Last update timestamp.}
+#'     \item{titel}{Character. Display title with role.}
+#'     \item{person_roles}{List. Roles and alternative names.}
+#'   }
+#'
+#' Wrapped in a one-row tibble with `num_found` (integer), `cursor`
+#' (character), and `documents` (list-column) when not yet unpacked.
+#' @family DIP Bundestag
 #' @export
 dip_bundestag_person_list <- function(params = list(),
                                       safe = TRUE,
@@ -414,16 +858,34 @@ dip_bundestag_person_list <- function(params = list(),
 #' Get a DIP Person
 #'
 #' @param person_id Person id.
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @inheritParams dip_bundestag_vorgang_list
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
+#' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
 #' @examples
 #' \dontrun{
 #' dip_bundestag_person(1728)
 #' }
 #'
-#' @return A tibble with person metadata.
+#' @return A one-row tibble for the selected person:
+#' \describe{
+#'   \item{id}{Person identifier (character).}
+#'   \item{nachname}{Last name (character).}
+#'   \item{vorname}{First name (character).}
+#'   \item{namenszusatz}{Name affix, e.g. `"von der"` (character or `NA`).}
+#'   \item{typ}{Entity type, always `"Person"` (character).}
+#'   \item{wahlperiode}{Legislative period of first associated document (integer or `NA`).}
+#'   \item{basisdatum}{Date of first associated document (character or `NA`).}
+#'   \item{datum}{Date of most recent associated document (character or `NA`).}
+#'   \item{aktualisiert}{Last update timestamp (character, ISO datetime).}
+#'   \item{titel}{Display title with role (character).}
+#'   \item{person_roles}{Roles and alternative names (list-column).}
+#' }
+#' @family DIP Bundestag
 #' @export
 dip_bundestag_person <- function(person_id,
                                  params = list(),

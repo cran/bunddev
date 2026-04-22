@@ -3,22 +3,41 @@
 #' @param filter Optional filter definition.
 #' @param range Optional range specification.
 #' @param orderby Optional ordering specification.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
-#' @param flatten Logical; drop nested list columns.
-#' @param flatten_mode Flatten strategy for list columns. Use "unnest" to
-#'   expand list-columns into multiple rows.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
+#' @param flatten Logical; if `TRUE`, simplify nested list columns according to
+#'   `flatten_mode`. Default `FALSE` keeps list columns as-is.
+#' @param flatten_mode How to handle list columns when `flatten = TRUE`:
+#'   \describe{
+#'     \item{`"drop"`}{Remove list columns entirely. Use when nested data is not
+#'       needed.}
+#'     \item{`"json"`}{Convert each list element to a JSON string. Preserves all
+#'       data in a text-queryable format. This is the **default**.}
+#'     \item{`"unnest"`}{Expand list columns into multiple rows via
+#'       [tidyr::unnest_longer()]. **Warning:** this can significantly increase
+#'       the number of rows.}
+#'   }
 #'
 #' @details
 #' Returns project stations from the MUDAB database.
-#' Official docs: https://mudab.api.bund.dev.
+#' API documentation: \url{https://mudab.api.bund.dev}.
 #'
 #' @examples
 #' \dontrun{
 #' mudab_project_stations(range = list(from = 0, count = 5))
 #' }
 #'
-#' @return A tibble with project stations.
+#' @return A [tibble][tibble::tibble] with one row per project station and columns:
+#'   \describe{
+#'     \item{metadataid}{Integer. Metadata identifier.}
+#'     \item{PROJECTSTATIONID}{Integer. Project station identifier.}
+#'     \item{NAME_PS}{Character. Project station name.}
+#'     \item{REGION}{Character. Region of the station.}
+#'     \item{INSTITUT}{Character. Responsible institute.}
+#'   }
+#' @family MUDAB
 #' @export
 mudab_project_stations <- function(filter = NULL,
                                    range = NULL,
@@ -42,19 +61,29 @@ mudab_project_stations <- function(filter = NULL,
 #' @param filter Optional filter definition.
 #' @param range Optional range specification.
 #' @param orderby Optional ordering specification.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
 #' Returns measurement stations from the MUDAB database.
-#' Official docs: https://mudab.api.bund.dev.
+#' API documentation: \url{https://mudab.api.bund.dev}.
 #'
 #' @examples
 #' \dontrun{
 #' mudab_stations(range = list(from = 0, count = 5))
 #' }
 #'
-#' @return A tibble with stations.
+#' @return A [tibble][tibble::tibble] with one row per measurement station and columns:
+#'   \describe{
+#'     \item{metadataid}{Integer. Metadata identifier.}
+#'     \item{STATNAME_ST}{Character. Station name.}
+#'     \item{NAME_PS}{Character. Project station name.}
+#'     \item{STATIONTYPE_ST}{Character. Station type.}
+#'     \item{COMPT_DS}{Character. Compartment code (BL, CW, CS, or CF).}
+#'   }
+#' @family MUDAB
 #' @export
 mudab_stations <- function(filter = NULL,
                            range = NULL,
@@ -76,19 +105,31 @@ mudab_stations <- function(filter = NULL,
 #' @param filter Optional filter definition.
 #' @param range Optional range specification.
 #' @param orderby Optional ordering specification.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
 #' Returns measurement parameters from the MUDAB database.
-#' Official docs: https://mudab.api.bund.dev.
+#' API documentation: \url{https://mudab.api.bund.dev}.
 #'
 #' @examples
 #' \dontrun{
 #' mudab_parameters(range = list(from = 0, count = 5))
 #' }
 #'
-#' @return A tibble with parameters.
+#' @return A [tibble][tibble::tibble] with one row per parameter and columns:
+#'   \describe{
+#'     \item{metadataid}{Integer. Metadata identifier.}
+#'     \item{COMPT_DS}{Character. Compartment code (BL, CW, CS, or CF).}
+#'     \item{PARAMETER}{Character. Parameter abbreviation.}
+#'     \item{PARAMETERGRUPPE}{Character. Parameter group code.}
+#'     \item{PARAM_NAME}{Character. Parameter name.}
+#'     \item{PARGROUP}{Character. Parameter group code (alternate).}
+#'     \item{PARAMGROUP_NAME}{Character. Parameter group name.}
+#'   }
+#' @family MUDAB
 #' @export
 mudab_parameters <- function(filter = NULL,
                              range = NULL,
@@ -110,22 +151,33 @@ mudab_parameters <- function(filter = NULL,
 #' @param filter Optional filter definition.
 #' @param range Optional range specification.
 #' @param orderby Optional ordering specification.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
 #' Returns measurement values for parameters from the MUDAB database.
-#' Official docs: https://mudab.api.bund.dev.
+#' API documentation: \url{https://mudab.api.bund.dev}.
 #'
 #' @examples
 #' \dontrun{
 #' mudab_parameter_values(range = list(from = 0, count = 5))
 #' }
 #'
-#' @return A tibble with parameter values.
-#'
-#' Includes `datetime_time` as POSIXct in Europe/Berlin when date/time fields are
-#' present.
+#' @return A [tibble][tibble::tibble] with one row per measurement value and columns:
+#'   \describe{
+#'     \item{metadataid}{Integer. Metadata identifier.}
+#'     \item{STATNAME_ST}{Character. Station name.}
+#'     \item{STATNAME_DATE_TIME}{Character. Composite station-date-time string.}
+#'     \item{PARAMETERID_PM}{Character. Parameter identifier.}
+#'     \item{PARAMCODE_PM}{Character. Parameter code name.}
+#'     \item{DATE_STM}{Character. Measurement date (YYYYMMDD).}
+#'     \item{TIME_STM}{Character. Measurement time (HHMM).}
+#'     \item{VALUE_MS}{Character. Measured value.}
+#'     \item{datetime_time}{POSIXct. Parsed date-time (Europe/Berlin).}
+#'   }
+#' @family MUDAB
 #' @export
 mudab_parameter_values <- function(filter = NULL,
                                    range = NULL,
@@ -147,19 +199,31 @@ mudab_parameter_values <- function(filter = NULL,
 #' @param filter Optional filter definition.
 #' @param range Optional range specification.
 #' @param orderby Optional ordering specification.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
 #' Returns parameter entries for the Biologie compartment.
-#' Official docs: https://mudab.api.bund.dev.
+#' API documentation: \url{https://mudab.api.bund.dev}.
 #'
 #' @examples
 #' \dontrun{
 #' mudab_parameters_biologie(range = list(from = 0, count = 5))
 #' }
 #'
-#' @return A tibble with parameters.
+#' @return A [tibble][tibble::tibble] with one row per parameter and columns:
+#'   \describe{
+#'     \item{metadataid}{Integer. Metadata identifier.}
+#'     \item{COMPT_DS}{Character. Compartment code (BL, CW, CS, or CF).}
+#'     \item{PARAMETER}{Character. Parameter abbreviation.}
+#'     \item{PARAMETERGRUPPE}{Character. Parameter group code.}
+#'     \item{PARAM_NAME}{Character. Parameter name.}
+#'     \item{PARGROUP}{Character. Parameter group code (alternate).}
+#'     \item{PARAMGROUP_NAME}{Character. Parameter group name.}
+#'   }
+#' @family MUDAB
 #' @export
 mudab_parameters_biologie <- function(filter = NULL,
                                       range = NULL,
@@ -181,19 +245,31 @@ mudab_parameters_biologie <- function(filter = NULL,
 #' @param filter Optional filter definition.
 #' @param range Optional range specification.
 #' @param orderby Optional ordering specification.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
 #' Returns parameter entries for the Biota compartment.
-#' Official docs: https://mudab.api.bund.dev.
+#' API documentation: \url{https://mudab.api.bund.dev}.
 #'
 #' @examples
 #' \dontrun{
 #' mudab_parameters_biota(range = list(from = 0, count = 5))
 #' }
 #'
-#' @return A tibble with parameters.
+#' @return A [tibble][tibble::tibble] with one row per parameter and columns:
+#'   \describe{
+#'     \item{metadataid}{Integer. Metadata identifier.}
+#'     \item{COMPT_DS}{Character. Compartment code (BL, CW, CS, or CF).}
+#'     \item{PARAMETER}{Character. Parameter abbreviation.}
+#'     \item{PARAMETERGRUPPE}{Character. Parameter group code.}
+#'     \item{PARAM_NAME}{Character. Parameter name.}
+#'     \item{PARGROUP}{Character. Parameter group code (alternate).}
+#'     \item{PARAMGROUP_NAME}{Character. Parameter group name.}
+#'   }
+#' @family MUDAB
 #' @export
 mudab_parameters_biota <- function(filter = NULL,
                                    range = NULL,
@@ -215,19 +291,31 @@ mudab_parameters_biota <- function(filter = NULL,
 #' @param filter Optional filter definition.
 #' @param range Optional range specification.
 #' @param orderby Optional ordering specification.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
 #' Returns parameter entries for the Wasser compartment.
-#' Official docs: https://mudab.api.bund.dev.
+#' API documentation: \url{https://mudab.api.bund.dev}.
 #'
 #' @examples
 #' \dontrun{
 #' mudab_parameters_wasser(range = list(from = 0, count = 5))
 #' }
 #'
-#' @return A tibble with parameters.
+#' @return A [tibble][tibble::tibble] with one row per parameter and columns:
+#'   \describe{
+#'     \item{metadataid}{Integer. Metadata identifier.}
+#'     \item{COMPT_DS}{Character. Compartment code (BL, CW, CS, or CF).}
+#'     \item{PARAMETER}{Character. Parameter abbreviation.}
+#'     \item{PARAMETERGRUPPE}{Character. Parameter group code.}
+#'     \item{PARAM_NAME}{Character. Parameter name.}
+#'     \item{PARGROUP}{Character. Parameter group code (alternate).}
+#'     \item{PARAMGROUP_NAME}{Character. Parameter group name.}
+#'   }
+#' @family MUDAB
 #' @export
 mudab_parameters_wasser <- function(filter = NULL,
                                     range = NULL,
@@ -249,19 +337,31 @@ mudab_parameters_wasser <- function(filter = NULL,
 #' @param filter Optional filter definition.
 #' @param range Optional range specification.
 #' @param orderby Optional ordering specification.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
 #' Returns parameter entries for the Sediment compartment.
-#' Official docs: https://mudab.api.bund.dev.
+#' API documentation: \url{https://mudab.api.bund.dev}.
 #'
 #' @examples
 #' \dontrun{
 #' mudab_parameters_sediment(range = list(from = 0, count = 5))
 #' }
 #'
-#' @return A tibble with parameters.
+#' @return A [tibble][tibble::tibble] with one row per parameter and columns:
+#'   \describe{
+#'     \item{metadataid}{Integer. Metadata identifier.}
+#'     \item{COMPT_DS}{Character. Compartment code (BL, CW, CS, or CF).}
+#'     \item{PARAMETER}{Character. Parameter abbreviation.}
+#'     \item{PARAMETERGRUPPE}{Character. Parameter group code.}
+#'     \item{PARAM_NAME}{Character. Parameter name.}
+#'     \item{PARGROUP}{Character. Parameter group code (alternate).}
+#'     \item{PARAMGROUP_NAME}{Character. Parameter group name.}
+#'   }
+#' @family MUDAB
 #' @export
 mudab_parameters_sediment <- function(filter = NULL,
                                       range = NULL,
@@ -283,19 +383,32 @@ mudab_parameters_sediment <- function(filter = NULL,
 #' @param filter Optional filter definition.
 #' @param range Optional range specification.
 #' @param orderby Optional ordering specification.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
 #' Returns HELCOM PLC stations.
-#' Official docs: https://mudab.api.bund.dev.
+#' API documentation: \url{https://mudab.api.bund.dev}.
 #'
 #' @examples
 #' \dontrun{
 #' mudab_plc_stations(range = list(from = 0, count = 5))
 #' }
 #'
-#' @return A tibble with PLC stations.
+#' @return A [tibble][tibble::tibble] with one row per PLC station and columns:
+#'   \describe{
+#'     \item{STATION_NAME}{Character. Station name.}
+#'     \item{STATION_CODE}{Character. Station code.}
+#'     \item{LAND_CD}{Character. Federal state code.}
+#'     \item{ST_LAT}{Numeric. Latitude.}
+#'     \item{ST_LON}{Numeric. Longitude.}
+#'     \item{SUBCM_CODE}{Character. Sub-compartment code.}
+#'     \item{SUBCM_NAME}{Character. Sub-compartment name.}
+#'     \item{MON_TYPE}{Character. Monitoring type.}
+#'   }
+#' @family MUDAB
 #' @export
 mudab_plc_stations <- function(filter = NULL,
                                range = NULL,
@@ -317,19 +430,34 @@ mudab_plc_stations <- function(filter = NULL,
 #' @param filter Optional filter definition.
 #' @param range Optional range specification.
 #' @param orderby Optional ordering specification.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
 #' Returns parameters measured at PLC stations.
-#' Official docs: https://mudab.api.bund.dev.
+#' API documentation: \url{https://mudab.api.bund.dev}.
 #'
 #' @examples
 #' \dontrun{
 #' mudab_plc_parameters(range = list(from = 0, count = 5))
 #' }
 #'
-#' @return A tibble with PLC parameters.
+#' @return A [tibble][tibble::tibble] with one row per PLC parameter and columns:
+#'   \describe{
+#'     \item{metadataid}{Integer. Metadata identifier.}
+#'     \item{PARAMETER}{Character. Parameter abbreviation.}
+#'     \item{PARAMETERGRUPPE}{Character. Parameter group code.}
+#'     \item{STATION_CODE}{Character. Station code.}
+#'     \item{LETZTE_MESSUNG}{Character. Year of last measurement.}
+#'     \item{PRKEY}{Character. Unique key (station + parameter).}
+#'     \item{STATION_NAME}{Character. Station name.}
+#'     \item{ANZ_MESSWERTE}{Integer. Number of measured values.}
+#'     \item{SUBCM_CODE}{Character. Sub-compartment code.}
+#'     \item{SUBCM_NAME}{Character. Sub-compartment name.}
+#'   }
+#' @family MUDAB
 #' @export
 mudab_plc_parameters <- function(filter = NULL,
                                  range = NULL,
@@ -351,19 +479,42 @@ mudab_plc_parameters <- function(filter = NULL,
 #' @param filter Optional filter definition.
 #' @param range Optional range specification.
 #' @param orderby Optional ordering specification.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
 #' Returns PLC station measurement values.
-#' Official docs: https://mudab.api.bund.dev.
+#' API documentation: \url{https://mudab.api.bund.dev}.
 #'
 #' @examples
 #' \dontrun{
 #' mudab_plc_measurements(range = list(from = 0, count = 5))
 #' }
 #'
-#' @return A tibble with PLC measurements.
+#' @return A [tibble][tibble::tibble] with one row per PLC measurement and columns:
+#'   \describe{
+#'     \item{metadataid}{Integer. Metadata identifier.}
+#'     \item{NUMMER}{Integer. Running row number.}
+#'     \item{NAME}{Integer. Measurement name code.}
+#'     \item{STATION_CODE}{Character. Station code.}
+#'     \item{STATION_NAME}{Character. Station name.}
+#'     \item{VALUE}{Numeric. Measured value.}
+#'     \item{PARAM_TYPE}{Character. Aggregation type ("TOT" or "AVE").}
+#'     \item{PARAM_ID}{Character. Numeric code for NAME.}
+#'     \item{PERIOD_NAME}{Character. Measurement period (year).}
+#'     \item{PERIOD_TYPE}{Character. Aggregation duration ("A").}
+#'     \item{LAND_CD}{Character. Federal state code.}
+#'     \item{ST_LAT}{Numeric. Latitude.}
+#'     \item{ST_LON}{Numeric. Longitude.}
+#'     \item{SUBCM_CODE}{Character. Sub-compartment code.}
+#'     \item{SUBCM_NAME}{Character. Sub-compartment name.}
+#'     \item{MON_TYPE}{Character. Monitoring type.}
+#'     \item{VAL_UNIT}{Character. Measurement unit.}
+#'     \item{AREA}{Numeric. Area value.}
+#'   }
+#' @family MUDAB
 #' @export
 mudab_plc_measurements <- function(filter = NULL,
                                    range = NULL,

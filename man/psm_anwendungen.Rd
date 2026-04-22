@@ -17,14 +17,55 @@ psm_anwendungen(
 
 \item{awg_id}{Optional application identifier (16 characters).}
 
-\item{params}{Additional query parameters.}
+\item{params}{Named list of query parameters. Frequently used keys:
+\describe{
+\item{kennr}{Product id (e.g. \code{"024780-00"}).}
+\item{wirkstoffId}{Active ingredient id.}
+\item{awg_id}{Application id.}
+\item{kultur}{Crop filter code.}
+\item{kultur_gruppe}{Crop group filter code.}
+\item{kode}{Code filter for catalog lookups.}
+\item{kodeliste}{Code list name.}
+\item{sprache}{Language code.}
+}}
 
-\item{safe}{Logical; apply throttling and caching.}
+\item{safe}{Logical; if \code{TRUE} (default), apply rate-limiting and cache
+GET responses to \code{tools::R_user_dir("bunddev", "cache")}.}
 
-\item{refresh}{Logical; refresh cached responses.}
+\item{refresh}{Logical; if \code{TRUE}, ignore cached responses and re-fetch
+from the API (default \code{FALSE}).}
 }
 \value{
-A tibble with application data.
+A \link[tibble:tibble]{tibble} with one row per approved application and
+columns:
+\describe{
+\item{ANTRAGNR}{Character. Application request number.}
+\item{ANWENDUNGEN_ANZ_JE_BEFALL}{Numeric. Applications per infestation.}
+\item{ANWENDUNGEN_MAX_JE_KULTUR}{Numeric. Max applications per crop.}
+\item{ANWENDUNGEN_MAX_JE_VEGETATION}{Numeric. Max applications per vegetation period.}
+\item{ANWENDUNGSBEREICH}{Character. Area of use code.}
+\item{ANWENDUNGSTECHNIK}{Character. Application technique.}
+\item{AWGNR}{Character. Application group number.}
+\item{AWG_ID}{Character. Application identifier (16 chars).}
+\item{AW_ABSTAND_BIS}{Numeric. Application interval upper bound.}
+\item{AW_ABSTAND_EINHEIT}{Character. Interval unit.}
+\item{AW_ABSTAND_VON}{Numeric. Application interval lower bound.}
+\item{EINSATZGEBIET}{Character. Field of use code.}
+\item{GENEHMIGUNG}{Character. Approval flag.}
+\item{HUK}{Character. Home-and-garden flag.}
+\item{KENNR}{Character. Product identification number.}
+\item{KULTUR_ERL}{Character. Crop clarification text.}
+\item{SCHADORG_ERL}{Character. Pest clarification text.}
+\item{STADIUM_KULTUR_BEM}{Character. Crop growth-stage note.}
+\item{STADIUM_KULTUR_BIS}{Character. Crop growth-stage upper bound.}
+\item{STADIUM_KULTUR_KODELISTE}{Numeric. Crop growth-stage code list.}
+\item{STADIUM_KULTUR_VON}{Character. Crop growth-stage lower bound.}
+\item{STADIUM_SCHADORG_BEM}{Character. Pest growth-stage note.}
+\item{STADIUM_SCHADORG_BIS}{Character. Pest growth-stage upper bound.}
+\item{STADIUM_SCHADORG_KODELISTE}{Numeric. Pest growth-stage code list.}
+\item{STADIUM_SCHADORG_VON}{Character. Pest growth-stage lower bound.}
+\item{WIRKUNGSBEREICH}{Character. Efficacy area code.}
+}
 }
 \description{
 List approved applications
@@ -40,5 +81,14 @@ psm_anwendungen(kennr = "024780-00")
 
 }
 \seealso{
+\code{\link[=bunddev_parameters]{bunddev_parameters()}} to inspect available query parameters.
 \code{\link[=psm_mittel]{psm_mittel()}} to list products.
+
+Other Pflanzenschutzmittelzulassung: 
+\code{\link{psm_kultur_gruppen}()},
+\code{\link{psm_mittel}()},
+\code{\link{psm_schadorg_gruppen}()},
+\code{\link{psm_stand}()},
+\code{\link{psm_wirkstoffe}()}
 }
+\concept{Pflanzenschutzmittelzulassung}

@@ -1,15 +1,27 @@
 #' List air quality measurements
 #'
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param params Named list of query parameters. Common keys:
+#'   \describe{
+#'     \item{date_from}{Start date/time filter (character, ISO-8601/date).}
+#'     \item{date_to}{End date/time filter (character, ISO-8601/date).}
+#'     \item{component}{Pollutant component id/code (character).}
+#'     \item{scope}{Scope id/code (character).}
+#'     \item{station}{Station id/code (character).}
+#'     \item{network}{Network id/code (character).}
+#'     \item{lang}{Language code for labels/descriptions (character).}
+#'   }
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
 #' The Luftqualitaet API provides air quality data and metadata from the
 #' Umweltbundesamt. Use query parameters to filter by date/time and station.
-#' Official docs: https://luftqualitaet.api.bund.dev.
+#' API documentation: \url{https://luftqualitaet.api.bund.dev}.
 #'
 #' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
 #' [luftqualitaet_measures()] for measurement metadata and
 #' [luftqualitaet_components()] for pollutant components.
 #'
@@ -21,7 +33,13 @@
 #' ))
 #' }
 #'
-#' @return A tibble with air quality data.
+#' @return A [tibble][tibble::tibble] with one row per station/time observation.
+#'   Column names are derived from the \code{indices} metadata in the API
+#'   response and typically include a station id key column followed by
+#'   \code{date end (CET)}, an overall air-quality index, an incompleteness
+#'   flag, and per-component sub-arrays (component id, value, index, percent).
+#'   Exact column names and count vary by query parameters.
+#' @family Luftqualitaet
 #' @export
 luftqualitaet_airquality <- function(params = list(), safe = TRUE, refresh = FALSE) {
   response <- luftqualitaet_request("/airquality/json", params, safe, refresh)
@@ -30,15 +48,19 @@ luftqualitaet_airquality <- function(params = list(), safe = TRUE, refresh = FAL
 
 #' Get air quality date limits
 #'
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
-#' Returns date limits for air quality measurements. Official docs:
-#' https://luftqualitaet.api.bund.dev.
+#' Returns date limits for air quality measurements. API documentation: \url{https://luftqualitaet.api.bund.dev}.
 #'
-#' @return A tibble with date limits.
-#'
+#' @return A [tibble][tibble::tibble] with one row per station. Column names
+#'   are derived from the \code{indices} metadata in the API response and
+#'   typically include a \code{station_id} key column followed by
+#'   \code{limit date start min (CET)} and \code{limit date start max (CET)}.
+#' @family Luftqualitaet
 #' @export
 luftqualitaet_airquality_limits <- function(safe = TRUE, refresh = FALSE) {
   response <- luftqualitaet_request("/airquality/limits", list(), safe, refresh)
@@ -47,15 +69,22 @@ luftqualitaet_airquality_limits <- function(safe = TRUE, refresh = FALSE) {
 
 #' List annual balances
 #'
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @inheritParams luftqualitaet_airquality
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
-#' Returns annual balance data for a component and year. Official docs:
-#' https://luftqualitaet.api.bund.dev.
+#' Returns annual balance data for a component and year. API documentation: \url{https://luftqualitaet.api.bund.dev}.
 #'
-#' @return A tibble with annual balance data.
+#' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
+#' @return A [tibble][tibble::tibble] with one row per annual-balance record.
+#'   Column names are derived from the \code{indices} metadata in the API
+#'   response and typically include \code{station id}, \code{component id},
+#'   \code{year}, \code{value}, and \code{transgression type}.
+#' @family Luftqualitaet
 #' @export
 luftqualitaet_annualbalances <- function(params = list(), safe = TRUE, refresh = FALSE) {
   response <- luftqualitaet_request("/annualbalances/json", params, safe, refresh)
@@ -64,15 +93,23 @@ luftqualitaet_annualbalances <- function(params = list(), safe = TRUE, refresh =
 
 #' List components
 #'
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @inheritParams luftqualitaet_airquality
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
-#' Returns available pollutant components. Official docs:
-#' https://luftqualitaet.api.bund.dev.
+#' Returns available pollutant components. API documentation: \url{https://luftqualitaet.api.bund.dev}.
 #'
-#' @return A tibble with component metadata.
+#' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
+#' @return A [tibble][tibble::tibble] with one row per component. Column names
+#'   are derived from the \code{indices} metadata in the API response and
+#'   typically include a component id/code key column followed by
+#'   \code{component id}, \code{component code}, \code{component symbol},
+#'   \code{component unit}, and \code{component name}.
+#' @family Luftqualitaet
 #' @export
 luftqualitaet_components <- function(params = list(), safe = TRUE, refresh = FALSE) {
   response <- luftqualitaet_request("/components/json", params, safe, refresh)
@@ -81,15 +118,25 @@ luftqualitaet_components <- function(params = list(), safe = TRUE, refresh = FAL
 
 #' List measurements metadata
 #'
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @inheritParams luftqualitaet_airquality
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
 #' Returns measurement metadata for stations, components, and scopes. Official
 #' docs: https://luftqualitaet.api.bund.dev.
 #'
-#' @return A tibble with measurement metadata.
+#' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
+#' @return A [tibble][tibble::tibble] with one row per station/time
+#'   measurement. Column names are derived from the \code{indices} metadata in
+#'   the API response and typically include a station id key column and
+#'   per-observation arrays containing \code{component id}, \code{scope id},
+#'   \code{value}, \code{date end}, and \code{index}. Exact column names and
+#'   count vary by query parameters.
+#' @family Luftqualitaet
 #' @export
 luftqualitaet_measures <- function(params = list(), safe = TRUE, refresh = FALSE) {
   response <- luftqualitaet_request("/measures/json", params, safe, refresh)
@@ -98,15 +145,21 @@ luftqualitaet_measures <- function(params = list(), safe = TRUE, refresh = FALSE
 
 #' Get measurement date limits
 #'
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
-#' Returns date limits for measurement metadata. Official docs:
-#' https://luftqualitaet.api.bund.dev.
+#' Returns date limits for measurement metadata. API documentation: \url{https://luftqualitaet.api.bund.dev}.
 #'
-#' @return A tibble with date limits.
-#'
+#' @return A [tibble][tibble::tibble] with one row per scope/component/station
+#'   combination. Column names are derived from the \code{indices} metadata in
+#'   the API response and typically include \code{scope id},
+#'   \code{component id}, \code{station id},
+#'   \code{limit date start min (CET)}, and
+#'   \code{limit date start max (CET)}.
+#' @family Luftqualitaet
 #' @export
 luftqualitaet_measures_limits <- function(safe = TRUE, refresh = FALSE) {
   response <- luftqualitaet_request("/measures/limits", list(), safe, refresh)
@@ -115,15 +168,22 @@ luftqualitaet_measures_limits <- function(safe = TRUE, refresh = FALSE) {
 
 #' List networks
 #'
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @inheritParams luftqualitaet_airquality
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
-#' Returns networks used by the Luftqualitaet API. Official docs:
-#' https://luftqualitaet.api.bund.dev.
+#' Returns networks used by the Luftqualitaet API. API documentation: \url{https://luftqualitaet.api.bund.dev}.
 #'
-#' @return A tibble with network metadata.
+#' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
+#' @return A [tibble][tibble::tibble] with one row per monitoring network.
+#'   Column names are derived from the \code{indices} metadata in the API
+#'   response and typically include a network id/code key column followed by
+#'   \code{network id}, \code{network code}, and \code{network name}.
+#' @family Luftqualitaet
 #' @export
 luftqualitaet_networks <- function(params = list(), safe = TRUE, refresh = FALSE) {
   response <- luftqualitaet_request("/networks/json", params, safe, refresh)
@@ -132,15 +192,23 @@ luftqualitaet_networks <- function(params = list(), safe = TRUE, refresh = FALSE
 
 #' List scopes
 #'
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @inheritParams luftqualitaet_airquality
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
-#' Returns scopes used by the Luftqualitaet API. Official docs:
-#' https://luftqualitaet.api.bund.dev.
+#' Returns scopes used by the Luftqualitaet API. API documentation: \url{https://luftqualitaet.api.bund.dev}.
 #'
-#' @return A tibble with scope metadata.
+#' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
+#' @return A [tibble][tibble::tibble] with one row per scope. Column names are
+#'   derived from the \code{indices} metadata in the API response and typically
+#'   include a scope id/code key column followed by \code{scope id},
+#'   \code{scope code}, \code{scope time base}, \code{scope time scope},
+#'   \code{scope time is max}, and \code{scope name}.
+#' @family Luftqualitaet
 #' @export
 luftqualitaet_scopes <- function(params = list(), safe = TRUE, refresh = FALSE) {
   response <- luftqualitaet_request("/scopes/json", params, safe, refresh)
@@ -149,15 +217,22 @@ luftqualitaet_scopes <- function(params = list(), safe = TRUE, refresh = FALSE) 
 
 #' List station settings
 #'
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @inheritParams luftqualitaet_airquality
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
-#' Returns station settings metadata. Official docs:
-#' https://luftqualitaet.api.bund.dev.
+#' Returns station settings metadata. API documentation: \url{https://luftqualitaet.api.bund.dev}.
 #'
-#' @return A tibble with station settings metadata.
+#' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
+#' @return A [tibble][tibble::tibble] with one row per station setting. Column
+#'   names are derived from the \code{indices} metadata in the API response and
+#'   typically include \code{station setting id}, \code{station setting name},
+#'   and \code{station setting short name}.
+#' @family Luftqualitaet
 #' @export
 luftqualitaet_stationsettings <- function(params = list(), safe = TRUE, refresh = FALSE) {
   response <- luftqualitaet_request("/stationsettings/json", params, safe, refresh)
@@ -166,15 +241,21 @@ luftqualitaet_stationsettings <- function(params = list(), safe = TRUE, refresh 
 
 #' List station types
 #'
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @inheritParams luftqualitaet_airquality
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
-#' Returns station types metadata. Official docs:
-#' https://luftqualitaet.api.bund.dev.
+#' Returns station types metadata. API documentation: \url{https://luftqualitaet.api.bund.dev}.
 #'
-#' @return A tibble with station types metadata.
+#' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
+#' @return A [tibble][tibble::tibble] with one row per station type. Column
+#'   names are derived from the \code{indices} metadata in the API response and
+#'   typically include \code{station type id} and \code{station type name}.
+#' @family Luftqualitaet
 #' @export
 luftqualitaet_stationtypes <- function(params = list(), safe = TRUE, refresh = FALSE) {
   response <- luftqualitaet_request("/stationtypes/json", params, safe, refresh)
@@ -183,15 +264,23 @@ luftqualitaet_stationtypes <- function(params = list(), safe = TRUE, refresh = F
 
 #' List thresholds
 #'
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @inheritParams luftqualitaet_airquality
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
-#' Returns threshold metadata for components and scopes. Official docs:
-#' https://luftqualitaet.api.bund.dev.
+#' Returns threshold metadata for components and scopes. API documentation: \url{https://luftqualitaet.api.bund.dev}.
 #'
-#' @return A tibble with threshold metadata.
+#' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
+#' @return A [tibble][tibble::tibble] with one row per threshold entry. Column
+#'   names are derived from the \code{indices} metadata in the API response and
+#'   typically include \code{threshold id}, \code{component id},
+#'   \code{scope id}, \code{threshold min}, \code{threshold max}, and
+#'   \code{threshold index}.
+#' @family Luftqualitaet
 #' @export
 luftqualitaet_thresholds <- function(params = list(), safe = TRUE, refresh = FALSE) {
   response <- luftqualitaet_request("/thresholds/json", params, safe, refresh)
@@ -200,15 +289,23 @@ luftqualitaet_thresholds <- function(params = list(), safe = TRUE, refresh = FAL
 
 #' List transgressions
 #'
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @inheritParams luftqualitaet_airquality
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
-#' Returns exceedances (transgressions) data. Official docs:
-#' https://luftqualitaet.api.bund.dev.
+#' Returns exceedances (transgressions) data. API documentation: \url{https://luftqualitaet.api.bund.dev}.
 #'
-#' @return A tibble with transgressions data.
+#' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
+#' @return A [tibble][tibble::tibble] with one row per station transgression
+#'   record. Column names are derived from the \code{indices} metadata in the
+#'   API response and typically include \code{station id}, \code{day_first},
+#'   \code{day_recent}, \code{value of year}, and monthly values for January
+#'   through December.
+#' @family Luftqualitaet
 #' @export
 luftqualitaet_transgressions <- function(params = list(), safe = TRUE, refresh = FALSE) {
   response <- luftqualitaet_request("/transgressions/json", params, safe, refresh)
@@ -217,15 +314,22 @@ luftqualitaet_transgressions <- function(params = list(), safe = TRUE, refresh =
 
 #' List transgression types
 #'
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @inheritParams luftqualitaet_airquality
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
-#' Returns available transgression types. Official docs:
-#' https://luftqualitaet.api.bund.dev.
+#' Returns available transgression types. API documentation: \url{https://luftqualitaet.api.bund.dev}.
 #'
-#' @return A tibble with transgression type metadata.
+#' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
+#' @return A [tibble][tibble::tibble] with one row per transgression type.
+#'   Column names are derived from the \code{indices} metadata in the API
+#'   response and typically include \code{exceedance type id} and
+#'   \code{exceedance type name}.
+#' @family Luftqualitaet
 #' @export
 luftqualitaet_transgressiontypes <- function(params = list(), safe = TRUE, refresh = FALSE) {
   response <- luftqualitaet_request("/transgressiontypes/json", params, safe, refresh)
@@ -234,15 +338,23 @@ luftqualitaet_transgressiontypes <- function(params = list(), safe = TRUE, refre
 
 #' List combined metadata
 #'
-#' @param params Query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @inheritParams luftqualitaet_airquality
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
-#' Returns combined metadata for a given use case. Official docs:
-#' https://luftqualitaet.api.bund.dev.
+#' Returns combined metadata for a given use case. API documentation: \url{https://luftqualitaet.api.bund.dev}.
 #'
-#' @return A tibble with combined metadata.
+#' @seealso
+#' [bunddev_parameters()] to inspect available query parameters.
+#' @return A [tibble][tibble::tibble] with combined metadata. The structure
+#'   depends on the \code{use} parameter and may include sections for
+#'   components, scopes, networks, stations, limits, and cross-references.
+#'   Column names are derived from the \code{indices} metadata in the API
+#'   response and vary by \code{use} value.
+#' @family Luftqualitaet
 #' @export
 luftqualitaet_meta <- function(params = list(), safe = TRUE, refresh = FALSE) {
   response <- luftqualitaet_request("/meta/json", params, safe, refresh)

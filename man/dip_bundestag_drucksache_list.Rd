@@ -13,19 +13,62 @@ dip_bundestag_drucksache_list(
 )
 }
 \arguments{
-\item{params}{Query parameters.}
+\item{params}{Named list of query parameters. Common keys:
+\describe{
+\item{format}{Response format (\code{"json"} recommended; default set by adapter).}
+\item{apikey}{Optional API key as query parameter (prefer auth header).}
+\item{fuzzy}{Free-text search string (character).}
+\item{sort}{Sort field/order definition (character).}
+\item{cursor}{Cursor for pagination (character).}
+\item{limit}{Page size/maximum number of documents (integer).}
+}}
 
-\item{safe}{Logical; apply throttling and caching.}
+\item{safe}{Logical; if \code{TRUE} (default), apply rate-limiting and cache
+GET responses to \code{tools::R_user_dir("bunddev", "cache")}.}
 
-\item{refresh}{Logical; refresh cached responses.}
+\item{refresh}{Logical; if \code{TRUE}, ignore cached responses and re-fetch
+from the API (default \code{FALSE}).}
 
-\item{flatten}{Logical; drop nested list columns.}
+\item{flatten}{Logical; if \code{TRUE}, simplify nested list columns according to
+\code{flatten_mode}. Default \code{FALSE} keeps list columns as-is.}
 
-\item{flatten_mode}{Flatten strategy for list columns. Use "unnest" to
-expand list-columns into multiple rows.}
+\item{flatten_mode}{How to handle list columns when \code{flatten = TRUE}:
+\describe{
+\item{\code{"drop"}}{Remove list columns entirely. Use when nested data is not
+needed.}
+\item{\code{"json"}}{Convert each list element to a JSON string. Preserves all
+data in a text-queryable format. This is the \strong{default}.}
+\item{\code{"unnest"}}{Expand list columns into multiple rows via
+\code{\link[tidyr:unnest_longer]{tidyr::unnest_longer()}}. \strong{Warning:} this can significantly increase
+the number of rows.}
+}}
 }
 \value{
-A tibble with DIP response metadata.
+A \link[tibble:tibble]{tibble} with one row per Drucksache and columns:
+\describe{
+\item{id}{Character. Unique Drucksache identifier.}
+\item{typ}{Character. Entity type, always \code{"Dokument"}.}
+\item{dokumentart}{Character. Document type, always \code{"Drucksache"}.}
+\item{drucksachetyp}{Character. Drucksache subtype.}
+\item{dokumentnummer}{Character. Document number.}
+\item{wahlperiode}{Integer. Legislative period.}
+\item{herausgeber}{Character. Publisher: \code{"BT"} or \code{"BR"}.}
+\item{datum}{Character. Publication date.}
+\item{aktualisiert}{Character. Last update timestamp.}
+\item{titel}{Character. Title text.}
+\item{autoren_anzahl}{Integer. Total author count.}
+\item{pdf_hash}{Character. MD5 checksum of PDF file.}
+\item{vorgangsbezug_anzahl}{Integer. Total related Vorgaenge.}
+\item{anlagen}{Character. Appendix description.}
+\item{autoren_anzeige}{List. Up to 4 display authors.}
+\item{fundstelle}{List. Document reference details.}
+\item{urheber}{List. Authoring bodies.}
+\item{vorgangsbezug}{List. Related Vorgaenge.}
+\item{ressort}{List. Government departments involved.}
+}
+
+Wrapped in a one-row tibble with \code{num_found} (integer), \code{cursor}
+(character), and \code{documents} (list-column) when not yet unpacked.
 }
 \description{
 List DIP Drucksachen
@@ -36,3 +79,24 @@ dip_bundestag_drucksache_list()
 }
 
 }
+\seealso{
+\code{\link[=bunddev_parameters]{bunddev_parameters()}} to inspect available query parameters.
+
+Other DIP Bundestag: 
+\code{\link{dip_bundestag_aktivitaet}()},
+\code{\link{dip_bundestag_aktivitaet_list}()},
+\code{\link{dip_bundestag_drucksache}()},
+\code{\link{dip_bundestag_drucksache_text}()},
+\code{\link{dip_bundestag_drucksache_text_list}()},
+\code{\link{dip_bundestag_person}()},
+\code{\link{dip_bundestag_person_list}()},
+\code{\link{dip_bundestag_plenarprotokoll}()},
+\code{\link{dip_bundestag_plenarprotokoll_list}()},
+\code{\link{dip_bundestag_plenarprotokoll_text}()},
+\code{\link{dip_bundestag_plenarprotokoll_text_list}()},
+\code{\link{dip_bundestag_vorgang}()},
+\code{\link{dip_bundestag_vorgang_list}()},
+\code{\link{dip_bundestag_vorgangsposition}()},
+\code{\link{dip_bundestag_vorgangsposition_list}()}
+}
+\concept{DIP Bundestag}

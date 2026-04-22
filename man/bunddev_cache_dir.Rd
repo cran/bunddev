@@ -7,14 +7,16 @@
 bunddev_cache_dir()
 }
 \value{
-Cache directory path.
+Path to the \code{bunddev} cache directory (character scalar).
 }
 \description{
 Locate the bunddev cache directory
 }
 \details{
 The cache directory is used to store downloaded OpenAPI specs and cached
-API responses. Use this to inspect or clean cached files.
+API responses. During \verb{R CMD check}, \code{bunddev} uses a temporary cache
+directory to avoid leaving persistent files behind. Use this to inspect or
+clean cached files.
 }
 \examples{
 \dontrun{
@@ -25,4 +27,17 @@ bunddev_cache_dir()
 \seealso{
 \code{\link[=bunddev_spec]{bunddev_spec()}} to download specs, and \code{\link[=bunddev_spec_path]{bunddev_spec_path()}} to locate
 a specific spec file.
+
+Other OpenAPI: 
+\code{\link{bunddev_call}()},
+\code{\link{bunddev_call_tidy}()},
+\code{\link{bunddev_endpoints}()},
+\code{\link{bunddev_ms_to_posix}()},
+\code{\link{bunddev_parameter_values}()},
+\code{\link{bunddev_parameters}()},
+\code{\link{bunddev_parameters_for}()},
+\code{\link{bunddev_spec}()},
+\code{\link{bunddev_spec_path}()},
+\code{\link{bunddev_timestamp_to_ms}()}
 }
+\concept{OpenAPI}

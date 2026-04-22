@@ -9,15 +9,50 @@ bewerberboerse_details(referenznummer, flatten = FALSE, flatten_mode = "json")
 \arguments{
 \item{referenznummer}{Bewerber referenznummer.}
 
-\item{flatten}{Logical; drop nested list columns.}
+\item{flatten}{Logical; if \code{TRUE}, simplify nested list columns according to
+\code{flatten_mode}. Default \code{FALSE} keeps list columns as-is.}
 
-\item{flatten_mode}{Flatten strategy for list columns. Use "unnest" to
-expand list-columns into multiple rows.}
+\item{flatten_mode}{How to handle list columns when \code{flatten = TRUE}:
+\describe{
+\item{\code{"drop"}}{Remove list columns entirely. Use when nested data is not
+needed.}
+\item{\code{"json"}}{Convert each list element to a JSON string. Preserves all
+data in a text-queryable format. This is the \strong{default}.}
+\item{\code{"unnest"}}{Expand list columns into multiple rows via
+\code{\link[tidyr:unnest_longer]{tidyr::unnest_longer()}}. \strong{Warning:} this can significantly increase
+the number of rows.}
+}}
 }
 \value{
-A tibble containing detailed information for a single candidate,
-including personal details, skills, work history, education, and contact
-preferences. Structure is similar to \code{\link[=bewerberboerse_search]{bewerberboerse_search()}} results.
+A tibble with the same columns as \code{\link[=bewerberboerse_search]{bewerberboerse_search()}}, filtered
+to the requested \code{referenznummer}.
+\describe{
+\item{refnr}{Candidate reference number (character).}
+\item{verfuegbarkeit_von}{Availability date text (character).}
+\item{aktualisierungsdatum}{Last update date text (character).}
+\item{veroeffentlichungsdatum}{Publication date text (character).}
+\item{stellenart}{Position type (character).}
+\item{arbeitszeit_modelle}{Work-time models, collapsed string (character).}
+\item{berufe}{Occupations, collapsed string (character).}
+\item{letzte_taetigkeit_jahr}{Year of most recent activity (character).}
+\item{letzte_taetigkeit_bezeichnung}{Label of most recent activity (character).}
+\item{letzte_taetigkeit_aktuell}{Whether latest activity is current (logical).}
+\item{hat_email}{Email contact available (logical).}
+\item{hat_telefon}{Phone contact available (logical).}
+\item{hat_adresse}{Postal address available (logical).}
+\item{ort}{City/locality (character).}
+\item{plz}{Postal code (character).}
+\item{umkreis}{Radius text returned by API (character).}
+\item{region}{Region/state (character).}
+\item{land}{Country (character).}
+\item{mehrere_arbeitsorte}{Multiple work locations flag (logical).}
+\item{ausbildungen}{Education entries (list-column).}
+\item{erfahrung}{Experience entries (list-column).}
+\item{operation_id}{Operation identifier (character).}
+\item{page}{Returned page index (integer).}
+\item{size}{Returned page size (integer).}
+\item{max_ergebnisse}{Total matching result count (integer).}
+}
 }
 \description{
 Retrieve Bewerberboerse candidate details
@@ -35,4 +70,8 @@ bewerberboerse_details("12345", flatten = TRUE)
 }
 \seealso{
 \code{\link[=bewerberboerse_search]{bewerberboerse_search()}} to find candidates and \code{\link[=bunddev_auth_set]{bunddev_auth_set()}} for auth.
+
+Other Bewerberboerse: 
+\code{\link{bewerberboerse_search}()}
 }
+\concept{Bewerberboerse}

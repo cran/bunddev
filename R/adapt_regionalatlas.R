@@ -5,15 +5,26 @@
 #' @param where Optional SQL WHERE clause for filtering.
 #' @param out_fields Fields to return (default "*" for all).
 #' @param return_geometry Logical; include geometry in response.
-#' @param params Additional query parameters.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param params Additional ArcGIS query parameters merged with adapter defaults.
+#'   Common keys:
+#'   \describe{
+#'     \item{layer}{JSON-encoded layer definition (set automatically from `table`).}
+#'     \item{where}{SQL-like filter expression (set from `where`).}
+#'     \item{outFields}{Fields to return (set from `out_fields`).}
+#'     \item{returnGeometry}{Whether to include geometry (`"true"`/`"false"`).}
+#'     \item{f}{Output format (`"json"` by default).}
+#'     \item{spatialRel}{Spatial relation, e.g. `"esriSpatialRelIntersects"`.}
+#'   }
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
 #' The Regionalatlas API provides access to over 160 regional indicators from
 #' the German statistical offices. Data is available at various administrative
 #' levels (Bundeslaender, Regierungsbezirke, Kreise, Gemeinden).
-#' Official docs: https://github.com/bundesAPI/regionalatlas-api.
+#' API documentation: \url{https://github.com/bundesAPI/regionalatlas-api}.
 #'
 #' Common tables and their indicators:
 #' - `ai002_1_5`: Population (ai0201=density, ai0202=change, ai0208=foreigners %)
@@ -42,7 +53,17 @@
 #' regionalatlas_query("ai002_4_5", where = "typ = 3")
 #' }
 #'
-#' @return A tibble with regional indicator data.
+#' @return A [tibble][tibble::tibble] with one row per geographic feature and columns:
+#'   \describe{
+#'     \item{ags}{Character. Official municipality key (Amtlicher Gemeindeschluessel).}
+#'     \item{ags2}{Character. Join key for indicator tables.}
+#'     \item{gen}{Character. Region name.}
+#'     \item{typ}{Integer. Administrative level (1=Bundeslaender, 2=Regierungsbezirke, 3=Kreise, 5=Gemeinden).}
+#'     \item{jahr}{Integer. Reference year.}
+#'     \item{jahr2}{Integer. Indicator reference year.}
+#'     \item{ai...}{Numeric. Indicator values whose names depend on the selected table (e.g. `ai0201` for population density).}
+#'   }
+#' @family Regionalatlas
 #' @export
 regionalatlas_query <- function(table,
                                 where = "1=1",

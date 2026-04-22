@@ -9,19 +9,29 @@ hilfsmittel_tree(level, safe = TRUE, refresh = FALSE)
 \arguments{
 \item{level}{Tree level to retrieve (1-4).}
 
-\item{safe}{Logical; apply throttling and caching.}
+\item{safe}{Logical; if \code{TRUE} (default), apply rate-limiting and cache
+GET responses to \code{tools::R_user_dir("bunddev", "cache")}.}
 
-\item{refresh}{Logical; refresh cached responses.}
+\item{refresh}{Logical; if \code{TRUE}, ignore cached responses and re-fetch
+from the API (default \code{FALSE}).}
 }
 \value{
-A tibble with tree nodes.
+A \link[tibble:tibble]{tibble} with one row per tree node and columns:
+\describe{
+\item{id}{Character. Node identifier.}
+\item{parentId}{Character. Parent node identifier (\code{NA} for roots).}
+\item{displayValue}{Character. Node display label.}
+\item{xStellerDisplayValue}{Character. xSteller with label.}
+\item{xSteller}{Character. Position code of the node.}
+\item{level}{Integer. Tree depth level.}
+}
 }
 \description{
 List Hilfsmittel tree nodes
 }
 \details{
 Returns nodes from the Hilfsmittel product tree up to the selected level.
-Official docs: https://github.com/bundesAPI/hilfsmittel-api.
+API documentation: \url{https://github.com/bundesAPI/hilfsmittel-api}.
 }
 \examples{
 \dontrun{
@@ -29,3 +39,13 @@ hilfsmittel_tree(level = 1)
 }
 
 }
+\seealso{
+Other Hilfsmittel: 
+\code{\link{hilfsmittel_nachweisschema}()},
+\code{\link{hilfsmittel_produkt}()},
+\code{\link{hilfsmittel_produktart}()},
+\code{\link{hilfsmittel_produkte}()},
+\code{\link{hilfsmittel_produktgruppe}()},
+\code{\link{hilfsmittel_untergruppe}()}
+}
+\concept{Hilfsmittel}

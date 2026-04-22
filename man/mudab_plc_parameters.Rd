@@ -19,19 +19,33 @@ mudab_plc_parameters(
 
 \item{orderby}{Optional ordering specification.}
 
-\item{safe}{Logical; apply throttling and caching.}
+\item{safe}{Logical; if \code{TRUE} (default), apply rate-limiting and cache
+GET responses to \code{tools::R_user_dir("bunddev", "cache")}.}
 
-\item{refresh}{Logical; refresh cached responses.}
+\item{refresh}{Logical; if \code{TRUE}, ignore cached responses and re-fetch
+from the API (default \code{FALSE}).}
 }
 \value{
-A tibble with PLC parameters.
+A \link[tibble:tibble]{tibble} with one row per PLC parameter and columns:
+\describe{
+\item{metadataid}{Integer. Metadata identifier.}
+\item{PARAMETER}{Character. Parameter abbreviation.}
+\item{PARAMETERGRUPPE}{Character. Parameter group code.}
+\item{STATION_CODE}{Character. Station code.}
+\item{LETZTE_MESSUNG}{Character. Year of last measurement.}
+\item{PRKEY}{Character. Unique key (station + parameter).}
+\item{STATION_NAME}{Character. Station name.}
+\item{ANZ_MESSWERTE}{Integer. Number of measured values.}
+\item{SUBCM_CODE}{Character. Sub-compartment code.}
+\item{SUBCM_NAME}{Character. Sub-compartment name.}
+}
 }
 \description{
 List MUDAB PLC parameters
 }
 \details{
 Returns parameters measured at PLC stations.
-Official docs: https://mudab.api.bund.dev.
+API documentation: \url{https://mudab.api.bund.dev}.
 }
 \examples{
 \dontrun{
@@ -39,3 +53,17 @@ mudab_plc_parameters(range = list(from = 0, count = 5))
 }
 
 }
+\seealso{
+Other MUDAB: 
+\code{\link{mudab_parameter_values}()},
+\code{\link{mudab_parameters}()},
+\code{\link{mudab_parameters_biologie}()},
+\code{\link{mudab_parameters_biota}()},
+\code{\link{mudab_parameters_sediment}()},
+\code{\link{mudab_parameters_wasser}()},
+\code{\link{mudab_plc_measurements}()},
+\code{\link{mudab_plc_stations}()},
+\code{\link{mudab_project_stations}()},
+\code{\link{mudab_stations}()}
+}
+\concept{MUDAB}

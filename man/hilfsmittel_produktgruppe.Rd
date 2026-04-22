@@ -15,24 +15,57 @@ hilfsmittel_produktgruppe(
 \arguments{
 \item{id}{Produktgruppe id.}
 
-\item{safe}{Logical; apply throttling and caching.}
+\item{safe}{Logical; if \code{TRUE} (default), apply rate-limiting and cache
+GET responses to \code{tools::R_user_dir("bunddev", "cache")}.}
 
-\item{refresh}{Logical; refresh cached responses.}
+\item{refresh}{Logical; if \code{TRUE}, ignore cached responses and re-fetch
+from the API (default \code{FALSE}).}
 
-\item{flatten}{Logical; drop nested list columns.}
+\item{flatten}{Logical; if \code{TRUE}, simplify nested list columns according to
+\code{flatten_mode}. Default \code{FALSE} keeps list columns as-is.}
 
-\item{flatten_mode}{Flatten strategy for list columns. Use "unnest" to
-expand list-columns into multiple rows.}
+\item{flatten_mode}{How to handle list columns when \code{flatten = TRUE}:
+\describe{
+\item{\code{"drop"}}{Remove list columns entirely. Use when nested data is not
+needed.}
+\item{\code{"json"}}{Convert each list element to a JSON string. Preserves all
+data in a text-queryable format. This is the \strong{default}.}
+\item{\code{"unnest"}}{Expand list columns into multiple rows via
+\code{\link[tidyr:unnest_longer]{tidyr::unnest_longer()}}. \strong{Warning:} this can significantly increase
+the number of rows.}
+}}
 }
 \value{
-A tibble with product group details.
+A \link[tibble:tibble]{tibble} with one row for the requested product
+group and columns:
+\describe{
+\item{id}{Character. Product group identifier.}
+\item{versionId}{Character. Internal version identifier.}
+\item{bezeichnung}{Character. Product group name.}
+\item{nummer}{Integer. Product group number.}
+\item{definition}{Character. Description text.}
+\item{indikation}{Character. Indication text.}
+\item{querverweis}{Character. Cross-reference to other groups.}
+\item{isNnElement}{Logical. Internal flag (usage unclear).}
+\item{sachbearbeiterGkvId}{Character. GKV case-worker identifier.}
+\item{sachbearbeiterGkv}{Character. Always \code{NA}.}
+\item{sachbearbeiterMdsId}{Character. MDS case-worker identifier.}
+\item{sachbearbeiterMds}{Character. Always \code{NA}.}
+\item{aufnahmeDatum}{Character. Admission date (ISO-8601).}
+\item{aenderungsDatum}{Character. Last-modified date (ISO-8601).}
+\item{veroeffentlichungsDokumentFileStoreId}{Character. Publication document id.}
+\item{merkblattFileStoreId}{Character. Always \code{NA}.}
+\item{isCollectionReviewable}{Logical. Internal flag (usage unclear).}
+\item{aufnahmeDatum_time}{POSIXct. Parsed admission date (Europe/Berlin).}
+\item{aenderungsDatum_time}{POSIXct. Parsed last-modified date (Europe/Berlin).}
+}
 }
 \description{
 Get Hilfsmittel product group details
 }
 \details{
 Returns details for a product group (Produktgruppe).
-Official docs: https://github.com/bundesAPI/hilfsmittel-api.
+API documentation: \url{https://github.com/bundesAPI/hilfsmittel-api}.
 }
 \examples{
 \dontrun{
@@ -41,3 +74,13 @@ hilfsmittel_produktgruppe(tree$id[[1]])
 }
 
 }
+\seealso{
+Other Hilfsmittel: 
+\code{\link{hilfsmittel_nachweisschema}()},
+\code{\link{hilfsmittel_produkt}()},
+\code{\link{hilfsmittel_produktart}()},
+\code{\link{hilfsmittel_produkte}()},
+\code{\link{hilfsmittel_tree}()},
+\code{\link{hilfsmittel_untergruppe}()}
+}
+\concept{Hilfsmittel}

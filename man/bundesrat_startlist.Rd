@@ -9,20 +9,31 @@ bundesrat_startlist(view = "renderXml", safe = TRUE, refresh = FALSE)
 \arguments{
 \item{view}{Rendering mode for the XML output.}
 
-\item{safe}{Logical; apply throttling and caching.}
+\item{safe}{Logical; if \code{TRUE} (default), apply rate-limiting and cache
+GET responses to \code{tools::R_user_dir("bunddev", "cache")}.}
 
-\item{refresh}{Logical; refresh cached responses.}
+\item{refresh}{Logical; if \code{TRUE}, ignore cached responses and re-fetch
+from the API (default \code{FALSE}).}
 }
 \value{
-A tibble with endpoint metadata.
+A tibble with one row per XML \verb{<item>} in the start list feed. Column
+names correspond to the XML child element names within each \verb{<item>}.
+\describe{
+\item{\verb{<tag>}}{One column per unique scalar child element (character).
+Exact names depend on the XML feed structure.}
+\item{\verb{<repeated_tag>}}{List-column when a child element name appears more
+than once in a single \verb{<item>}.}
+\item{date_time, dateOfIssue_time, imageDate_time, layoutDate_time, startdate_time, stopdate_time}{Parsed \code{POSIXct} (Europe/Berlin) added when the corresponding source
+field (\code{date}, \code{dateOfIssue}, \code{imageDate}, \code{layoutDate}, \code{startdate},
+\code{stopdate}) is present.}
+}
 }
 \description{
 List Bundesrat API endpoints
 }
 \details{
 Returns the start list for the Bundesrat mobile API, including the URLs for
-other available resources. Official docs:
-https://bundesrat.api.bund.dev.
+other available resources. API documentation: \url{https://bundesrat.api.bund.dev}.
 }
 \examples{
 \dontrun{
@@ -30,3 +41,16 @@ bundesrat_startlist()
 }
 
 }
+\seealso{
+Other Bundesrat: 
+\code{\link{bundesrat_aktuelles}()},
+\code{\link{bundesrat_mitglieder}()},
+\code{\link{bundesrat_plenum_aktuelle_sitzung}()},
+\code{\link{bundesrat_plenum_chronologisch}()},
+\code{\link{bundesrat_plenum_kompakt}()},
+\code{\link{bundesrat_plenum_naechste_sitzungen}()},
+\code{\link{bundesrat_praesidium}()},
+\code{\link{bundesrat_stimmverteilung}()},
+\code{\link{bundesrat_termine}()}
+}
+\concept{Bundesrat}

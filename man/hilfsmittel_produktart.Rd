@@ -15,24 +15,53 @@ hilfsmittel_produktart(
 \arguments{
 \item{id}{Produktart id.}
 
-\item{safe}{Logical; apply throttling and caching.}
+\item{safe}{Logical; if \code{TRUE} (default), apply rate-limiting and cache
+GET responses to \code{tools::R_user_dir("bunddev", "cache")}.}
 
-\item{refresh}{Logical; refresh cached responses.}
+\item{refresh}{Logical; if \code{TRUE}, ignore cached responses and re-fetch
+from the API (default \code{FALSE}).}
 
-\item{flatten}{Logical; drop nested list columns.}
+\item{flatten}{Logical; if \code{TRUE}, simplify nested list columns according to
+\code{flatten_mode}. Default \code{FALSE} keeps list columns as-is.}
 
-\item{flatten_mode}{Flatten strategy for list columns. Use "unnest" to
-expand list-columns into multiple rows.}
+\item{flatten_mode}{How to handle list columns when \code{flatten = TRUE}:
+\describe{
+\item{\code{"drop"}}{Remove list columns entirely. Use when nested data is not
+needed.}
+\item{\code{"json"}}{Convert each list element to a JSON string. Preserves all
+data in a text-queryable format. This is the \strong{default}.}
+\item{\code{"unnest"}}{Expand list columns into multiple rows via
+\code{\link[tidyr:unnest_longer]{tidyr::unnest_longer()}}. \strong{Warning:} this can significantly increase
+the number of rows.}
+}}
 }
 \value{
-A tibble with product type details.
+A \link[tibble:tibble]{tibble} with one row for the requested product
+type and columns:
+\describe{
+\item{id}{Character. Product-type identifier.}
+\item{versionId}{Character. Internal version identifier.}
+\item{nummer}{Integer. Product-type number.}
+\item{beschreibung}{Character. Description text.}
+\item{bezeichnung}{Character. Product-type name.}
+\item{untergruppeId}{Character. Parent subgroup identifier.}
+\item{indikation}{Character. Indication text.}
+\item{siebenSteller}{Character. Seven-digit code.}
+\item{isNnElement}{Logical. Internal flag (usage unclear).}
+\item{konstruktionsmerkmalschemaId}{Character. Construction-feature schema id.}
+\item{untergruppe}{Integer. Always \code{NA}.}
+\item{aufnahmeDatum}{Character. Admission date (ISO-8601).}
+\item{aenderungsDatum}{Character. Last-modified date (ISO-8601).}
+\item{aufnahmeDatum_time}{POSIXct. Parsed admission date (Europe/Berlin).}
+\item{aenderungsDatum_time}{POSIXct. Parsed last-modified date (Europe/Berlin).}
+}
 }
 \description{
 Get Hilfsmittel product type details
 }
 \details{
 Returns details for a product type (Produktart).
-Official docs: https://github.com/bundesAPI/hilfsmittel-api.
+API documentation: \url{https://github.com/bundesAPI/hilfsmittel-api}.
 }
 \examples{
 \dontrun{
@@ -40,3 +69,13 @@ hilfsmittel_produktart("e6b913ef-cf21-4c5f-826d-f866516c3c65")
 }
 
 }
+\seealso{
+Other Hilfsmittel: 
+\code{\link{hilfsmittel_nachweisschema}()},
+\code{\link{hilfsmittel_produkt}()},
+\code{\link{hilfsmittel_produkte}()},
+\code{\link{hilfsmittel_produktgruppe}()},
+\code{\link{hilfsmittel_tree}()},
+\code{\link{hilfsmittel_untergruppe}()}
+}
+\concept{Hilfsmittel}

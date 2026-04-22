@@ -1,10 +1,12 @@
 #' List Autobahn road ids
 #'
-#' @return A tibble with available road ids.
-#'
+#' @return A tibble with one row per Autobahn id:
+#' \describe{
+#'   \item{road_id}{Autobahn identifier (character).}
+#' }
 #' @details
 #' Lists Autobahn road ids from the Autobahn App API (Autobahn GmbH).
-#' Official docs: https://autobahn.api.bund.dev.
+#' API documentation: \url{https://autobahn.api.bund.dev}.
 #'
 #' @seealso
 #' [autobahn_roadworks()] and [autobahn_warnings()] for road-specific data.
@@ -13,6 +15,7 @@
 #' \dontrun{
 #' autobahn_roads()
 #' }
+#' @family Autobahn
 #' @export
 autobahn_roads <- function() {
   bunddev_call_tidy("autobahn", "list-autobahnen")
@@ -21,15 +24,45 @@ autobahn_roads <- function() {
 #' List Autobahn roadworks
 #'
 #' @param road_id Road identifier.
-#' @param flatten Logical; drop nested list columns.
-#' @param flatten_mode Flatten strategy for list columns. Use "unnest" to
-#'   expand list-columns into multiple rows.
+#' @param flatten Logical; if `TRUE`, simplify nested list columns according to
+#'   `flatten_mode`. Default `FALSE` keeps list columns as-is.
+#' @param flatten_mode How to handle list columns when `flatten = TRUE`:
+#'   \describe{
+#'     \item{`"drop"`}{Remove list columns entirely. Use when nested data is not
+#'       needed.}
+#'     \item{`"json"`}{Convert each list element to a JSON string. Preserves all
+#'       data in a text-queryable format. This is the **default**.}
+#'     \item{`"unnest"`}{Expand list columns into multiple rows via
+#'       [tidyr::unnest_longer()]. **Warning:** this can significantly increase
+#'       the number of rows.}
+#'   }
 #'
-#' @return A tibble with roadworks.
-#'
+#' @return A tibble with one row per roadwork entry:
+#' \describe{
+#'   \item{road_id}{Road identifier (character).}
+#'   \item{identifier}{Entry identifier (character).}
+#'   \item{title}{Title (character).}
+#'   \item{subtitle}{Subtitle (character).}
+#'   \item{display_type}{Display type (character).}
+#'   \item{icon}{Icon identifier (character).}
+#'   \item{is_blocked}{Whether the road is blocked (logical).}
+#'   \item{future}{Whether the entry is future-dated (logical).}
+#'   \item{start_timestamp}{Start timestamp string (character).}
+#'   \item{start_time}{Parsed start time (POSIXct).}
+#'   \item{point}{Point coordinate string (character).}
+#'   \item{extent}{Extent coordinate string (character).}
+#'   \item{coordinate_lat}{Latitude (character).}
+#'   \item{coordinate_long}{Longitude (character).}
+#'   \item{description}{Description text (character).}
+#'   \item{footer}{Footer text (character).}
+#'   \item{route_recommendation}{Route recommendations (list-column).}
+#'   \item{lorry_parking_feature_icons}{Lorry parking feature icons (list-column).}
+#' }
+#' With `flatten = TRUE`, the two list-columns are transformed according to
+#' `flatten_mode`.
 #' @details
 #' Returns current roadworks for a specific Autobahn road id.
-#' Official docs: https://autobahn.api.bund.dev.
+#' API documentation: \url{https://autobahn.api.bund.dev}.
 #'
 #' @seealso
 #' [autobahn_roads()] to list available roads, and [autobahn_roadwork_details()]
@@ -40,6 +73,7 @@ autobahn_roads <- function() {
 #' roads <- autobahn_roads()
 #' autobahn_roadworks(roads$road_id[[1]], flatten = TRUE)
 #' }
+#' @family Autobahn
 #' @export
 autobahn_roadworks <- function(road_id, flatten = FALSE, flatten_mode = "json") {
   bunddev_call_tidy(
@@ -55,15 +89,45 @@ autobahn_roadworks <- function(road_id, flatten = FALSE, flatten_mode = "json") 
 #' List Autobahn warnings
 #'
 #' @param road_id Road identifier.
-#' @param flatten Logical; drop nested list columns.
-#' @param flatten_mode Flatten strategy for list columns. Use "unnest" to
-#'   expand list-columns into multiple rows.
+#' @param flatten Logical; if `TRUE`, simplify nested list columns according to
+#'   `flatten_mode`. Default `FALSE` keeps list columns as-is.
+#' @param flatten_mode How to handle list columns when `flatten = TRUE`:
+#'   \describe{
+#'     \item{`"drop"`}{Remove list columns entirely. Use when nested data is not
+#'       needed.}
+#'     \item{`"json"`}{Convert each list element to a JSON string. Preserves all
+#'       data in a text-queryable format. This is the **default**.}
+#'     \item{`"unnest"`}{Expand list columns into multiple rows via
+#'       [tidyr::unnest_longer()]. **Warning:** this can significantly increase
+#'       the number of rows.}
+#'   }
 #'
-#' @return A tibble with warnings.
-#'
+#' @return A tibble with one row per warning entry:
+#' \describe{
+#'   \item{road_id}{Road identifier (character).}
+#'   \item{identifier}{Entry identifier (character).}
+#'   \item{title}{Title (character).}
+#'   \item{subtitle}{Subtitle (character).}
+#'   \item{display_type}{Display type (character).}
+#'   \item{icon}{Icon identifier (character).}
+#'   \item{is_blocked}{Whether the road is blocked (logical).}
+#'   \item{future}{Whether the entry is future-dated (logical).}
+#'   \item{start_timestamp}{Start timestamp string (character).}
+#'   \item{start_time}{Parsed start time (POSIXct).}
+#'   \item{point}{Point coordinate string (character).}
+#'   \item{extent}{Extent coordinate string (character).}
+#'   \item{coordinate_lat}{Latitude (character).}
+#'   \item{coordinate_long}{Longitude (character).}
+#'   \item{description}{Description text (character).}
+#'   \item{footer}{Footer text (character).}
+#'   \item{route_recommendation}{Route recommendations (list-column).}
+#'   \item{lorry_parking_feature_icons}{Lorry parking feature icons (list-column).}
+#' }
+#' With `flatten = TRUE`, the two list-columns are transformed according to
+#' `flatten_mode`.
 #' @details
 #' Returns current warnings for a specific Autobahn road id.
-#' Official docs: https://autobahn.api.bund.dev.
+#' API documentation: \url{https://autobahn.api.bund.dev}.
 #'
 #' @seealso
 #' [autobahn_roads()] to list roads and [autobahn_warning_details()] for details.
@@ -73,6 +137,7 @@ autobahn_roadworks <- function(road_id, flatten = FALSE, flatten_mode = "json") 
 #' roads <- autobahn_roads()
 #' autobahn_warnings(roads$road_id[[1]], flatten = TRUE)
 #' }
+#' @family Autobahn
 #' @export
 autobahn_warnings <- function(road_id, flatten = FALSE, flatten_mode = "json") {
   bunddev_call_tidy(
@@ -88,15 +153,45 @@ autobahn_warnings <- function(road_id, flatten = FALSE, flatten_mode = "json") {
 #' List Autobahn webcams
 #'
 #' @param road_id Road identifier.
-#' @param flatten Logical; drop nested list columns.
-#' @param flatten_mode Flatten strategy for list columns. Use "unnest" to
-#'   expand list-columns into multiple rows.
+#' @param flatten Logical; if `TRUE`, simplify nested list columns according to
+#'   `flatten_mode`. Default `FALSE` keeps list columns as-is.
+#' @param flatten_mode How to handle list columns when `flatten = TRUE`:
+#'   \describe{
+#'     \item{`"drop"`}{Remove list columns entirely. Use when nested data is not
+#'       needed.}
+#'     \item{`"json"`}{Convert each list element to a JSON string. Preserves all
+#'       data in a text-queryable format. This is the **default**.}
+#'     \item{`"unnest"`}{Expand list columns into multiple rows via
+#'       [tidyr::unnest_longer()]. **Warning:** this can significantly increase
+#'       the number of rows.}
+#'   }
 #'
-#' @return A tibble with webcams.
-#'
+#' @return A tibble with one row per webcam entry:
+#' \describe{
+#'   \item{road_id}{Road identifier (character).}
+#'   \item{identifier}{Entry identifier (character).}
+#'   \item{title}{Title (character).}
+#'   \item{subtitle}{Subtitle (character).}
+#'   \item{display_type}{Display type (character).}
+#'   \item{icon}{Icon identifier (character).}
+#'   \item{is_blocked}{Whether the road is blocked (logical).}
+#'   \item{future}{Whether the entry is future-dated (logical).}
+#'   \item{start_timestamp}{Start timestamp string (character).}
+#'   \item{start_time}{Parsed start time (POSIXct).}
+#'   \item{point}{Point coordinate string (character).}
+#'   \item{extent}{Extent coordinate string (character).}
+#'   \item{coordinate_lat}{Latitude (character).}
+#'   \item{coordinate_long}{Longitude (character).}
+#'   \item{description}{Description text (character).}
+#'   \item{footer}{Footer text (character).}
+#'   \item{route_recommendation}{Route recommendations (list-column).}
+#'   \item{lorry_parking_feature_icons}{Lorry parking feature icons (list-column).}
+#' }
+#' With `flatten = TRUE`, the two list-columns are transformed according to
+#' `flatten_mode`.
 #' @details
 #' Returns webcam entries for a specific Autobahn road id.
-#' Official docs: https://autobahn.api.bund.dev.
+#' API documentation: \url{https://autobahn.api.bund.dev}.
 #'
 #' @seealso
 #' [autobahn_roads()] and [autobahn_webcam_details()].
@@ -106,6 +201,7 @@ autobahn_warnings <- function(road_id, flatten = FALSE, flatten_mode = "json") {
 #' roads <- autobahn_roads()
 #' autobahn_webcams(roads$road_id[[1]], flatten = TRUE)
 #' }
+#' @family Autobahn
 #' @export
 autobahn_webcams <- function(road_id, flatten = FALSE, flatten_mode = "json") {
   bunddev_call_tidy(
@@ -121,15 +217,45 @@ autobahn_webcams <- function(road_id, flatten = FALSE, flatten_mode = "json") {
 #' List Autobahn closures
 #'
 #' @param road_id Road identifier.
-#' @param flatten Logical; drop nested list columns.
-#' @param flatten_mode Flatten strategy for list columns. Use "unnest" to
-#'   expand list-columns into multiple rows.
+#' @param flatten Logical; if `TRUE`, simplify nested list columns according to
+#'   `flatten_mode`. Default `FALSE` keeps list columns as-is.
+#' @param flatten_mode How to handle list columns when `flatten = TRUE`:
+#'   \describe{
+#'     \item{`"drop"`}{Remove list columns entirely. Use when nested data is not
+#'       needed.}
+#'     \item{`"json"`}{Convert each list element to a JSON string. Preserves all
+#'       data in a text-queryable format. This is the **default**.}
+#'     \item{`"unnest"`}{Expand list columns into multiple rows via
+#'       [tidyr::unnest_longer()]. **Warning:** this can significantly increase
+#'       the number of rows.}
+#'   }
 #'
-#' @return A tibble with closures.
-#'
+#' @return A tibble with one row per closure entry:
+#' \describe{
+#'   \item{road_id}{Road identifier (character).}
+#'   \item{identifier}{Entry identifier (character).}
+#'   \item{title}{Title (character).}
+#'   \item{subtitle}{Subtitle (character).}
+#'   \item{display_type}{Display type (character).}
+#'   \item{icon}{Icon identifier (character).}
+#'   \item{is_blocked}{Whether the road is blocked (logical).}
+#'   \item{future}{Whether the entry is future-dated (logical).}
+#'   \item{start_timestamp}{Start timestamp string (character).}
+#'   \item{start_time}{Parsed start time (POSIXct).}
+#'   \item{point}{Point coordinate string (character).}
+#'   \item{extent}{Extent coordinate string (character).}
+#'   \item{coordinate_lat}{Latitude (character).}
+#'   \item{coordinate_long}{Longitude (character).}
+#'   \item{description}{Description text (character).}
+#'   \item{footer}{Footer text (character).}
+#'   \item{route_recommendation}{Route recommendations (list-column).}
+#'   \item{lorry_parking_feature_icons}{Lorry parking feature icons (list-column).}
+#' }
+#' With `flatten = TRUE`, the two list-columns are transformed according to
+#' `flatten_mode`.
 #' @details
 #' Returns current closures for a specific Autobahn road id.
-#' Official docs: https://autobahn.api.bund.dev.
+#' API documentation: \url{https://autobahn.api.bund.dev}.
 #'
 #' @seealso
 #' [autobahn_roads()] and [autobahn_closure_details()].
@@ -139,6 +265,7 @@ autobahn_webcams <- function(road_id, flatten = FALSE, flatten_mode = "json") {
 #' roads <- autobahn_roads()
 #' autobahn_closures(roads$road_id[[1]], flatten = TRUE)
 #' }
+#' @family Autobahn
 #' @export
 autobahn_closures <- function(road_id, flatten = FALSE, flatten_mode = "json") {
   bunddev_call_tidy(
@@ -154,15 +281,45 @@ autobahn_closures <- function(road_id, flatten = FALSE, flatten_mode = "json") {
 #' List Autobahn charging stations
 #'
 #' @param road_id Road identifier.
-#' @param flatten Logical; drop nested list columns.
-#' @param flatten_mode Flatten strategy for list columns. Use "unnest" to
-#'   expand list-columns into multiple rows.
+#' @param flatten Logical; if `TRUE`, simplify nested list columns according to
+#'   `flatten_mode`. Default `FALSE` keeps list columns as-is.
+#' @param flatten_mode How to handle list columns when `flatten = TRUE`:
+#'   \describe{
+#'     \item{`"drop"`}{Remove list columns entirely. Use when nested data is not
+#'       needed.}
+#'     \item{`"json"`}{Convert each list element to a JSON string. Preserves all
+#'       data in a text-queryable format. This is the **default**.}
+#'     \item{`"unnest"`}{Expand list columns into multiple rows via
+#'       [tidyr::unnest_longer()]. **Warning:** this can significantly increase
+#'       the number of rows.}
+#'   }
 #'
-#' @return A tibble with charging stations.
-#'
+#' @return A tibble with one row per charging-station entry:
+#' \describe{
+#'   \item{road_id}{Road identifier (character).}
+#'   \item{identifier}{Entry identifier (character).}
+#'   \item{title}{Title (character).}
+#'   \item{subtitle}{Subtitle (character).}
+#'   \item{display_type}{Display type (character).}
+#'   \item{icon}{Icon identifier (character).}
+#'   \item{is_blocked}{Whether the road is blocked (logical).}
+#'   \item{future}{Whether the entry is future-dated (logical).}
+#'   \item{start_timestamp}{Start timestamp string (character).}
+#'   \item{start_time}{Parsed start time (POSIXct).}
+#'   \item{point}{Point coordinate string (character).}
+#'   \item{extent}{Extent coordinate string (character).}
+#'   \item{coordinate_lat}{Latitude (character).}
+#'   \item{coordinate_long}{Longitude (character).}
+#'   \item{description}{Description text (character).}
+#'   \item{footer}{Footer text (character).}
+#'   \item{route_recommendation}{Route recommendations (list-column).}
+#'   \item{lorry_parking_feature_icons}{Lorry parking feature icons (list-column).}
+#' }
+#' With `flatten = TRUE`, the two list-columns are transformed according to
+#' `flatten_mode`.
 #' @details
 #' Returns charging stations for a specific Autobahn road id.
-#' Official docs: https://autobahn.api.bund.dev.
+#' API documentation: \url{https://autobahn.api.bund.dev}.
 #'
 #' @seealso
 #' [autobahn_roads()] and [autobahn_charging_station_details()].
@@ -172,6 +329,7 @@ autobahn_closures <- function(road_id, flatten = FALSE, flatten_mode = "json") {
 #' roads <- autobahn_roads()
 #' autobahn_charging_stations(roads$road_id[[1]], flatten = TRUE)
 #' }
+#' @family Autobahn
 #' @export
 autobahn_charging_stations <- function(road_id, flatten = FALSE, flatten_mode = "json") {
   bunddev_call_tidy(
@@ -187,15 +345,45 @@ autobahn_charging_stations <- function(road_id, flatten = FALSE, flatten_mode = 
 #' List Autobahn lorry parking areas
 #'
 #' @param road_id Road identifier.
-#' @param flatten Logical; drop nested list columns.
-#' @param flatten_mode Flatten strategy for list columns. Use "unnest" to
-#'   expand list-columns into multiple rows.
+#' @param flatten Logical; if `TRUE`, simplify nested list columns according to
+#'   `flatten_mode`. Default `FALSE` keeps list columns as-is.
+#' @param flatten_mode How to handle list columns when `flatten = TRUE`:
+#'   \describe{
+#'     \item{`"drop"`}{Remove list columns entirely. Use when nested data is not
+#'       needed.}
+#'     \item{`"json"`}{Convert each list element to a JSON string. Preserves all
+#'       data in a text-queryable format. This is the **default**.}
+#'     \item{`"unnest"`}{Expand list columns into multiple rows via
+#'       [tidyr::unnest_longer()]. **Warning:** this can significantly increase
+#'       the number of rows.}
+#'   }
 #'
-#' @return A tibble with lorry parking areas.
-#'
+#' @return A tibble with one row per lorry-parking entry:
+#' \describe{
+#'   \item{road_id}{Road identifier (character).}
+#'   \item{identifier}{Entry identifier (character).}
+#'   \item{title}{Title (character).}
+#'   \item{subtitle}{Subtitle (character).}
+#'   \item{display_type}{Display type (character).}
+#'   \item{icon}{Icon identifier (character).}
+#'   \item{is_blocked}{Whether the road is blocked (logical).}
+#'   \item{future}{Whether the entry is future-dated (logical).}
+#'   \item{start_timestamp}{Start timestamp string (character).}
+#'   \item{start_time}{Parsed start time (POSIXct).}
+#'   \item{point}{Point coordinate string (character).}
+#'   \item{extent}{Extent coordinate string (character).}
+#'   \item{coordinate_lat}{Latitude (character).}
+#'   \item{coordinate_long}{Longitude (character).}
+#'   \item{description}{Description text (character).}
+#'   \item{footer}{Footer text (character).}
+#'   \item{route_recommendation}{Route recommendations (list-column).}
+#'   \item{lorry_parking_feature_icons}{Lorry parking feature icons (list-column).}
+#' }
+#' With `flatten = TRUE`, the two list-columns are transformed according to
+#' `flatten_mode`.
 #' @details
 #' Returns lorry parking areas for a specific Autobahn road id.
-#' Official docs: https://autobahn.api.bund.dev.
+#' API documentation: \url{https://autobahn.api.bund.dev}.
 #'
 #' @seealso
 #' [autobahn_roads()] and [autobahn_parking_lorry_details()].
@@ -205,6 +393,7 @@ autobahn_charging_stations <- function(road_id, flatten = FALSE, flatten_mode = 
 #' roads <- autobahn_roads()
 #' autobahn_parking_lorries(roads$road_id[[1]], flatten = TRUE)
 #' }
+#' @family Autobahn
 #' @export
 autobahn_parking_lorries <- function(road_id, flatten = FALSE, flatten_mode = "json") {
   bunddev_call_tidy(
@@ -220,15 +409,24 @@ autobahn_parking_lorries <- function(road_id, flatten = FALSE, flatten_mode = "j
 #' Get Autobahn roadwork details
 #'
 #' @param roadwork_id Roadwork identifier.
-#' @param flatten Logical; drop nested list columns.
-#' @param flatten_mode Flatten strategy for list columns. Use "unnest" to
-#'   expand list-columns into multiple rows.
+#' @param flatten Logical; if `TRUE`, simplify nested list columns according to
+#'   `flatten_mode`. Default `FALSE` keeps list columns as-is.
+#' @param flatten_mode How to handle list columns when `flatten = TRUE`:
+#'   \describe{
+#'     \item{`"drop"`}{Remove list columns entirely. Use when nested data is not
+#'       needed.}
+#'     \item{`"json"`}{Convert each list element to a JSON string. Preserves all
+#'       data in a text-queryable format. This is the **default**.}
+#'     \item{`"unnest"`}{Expand list columns into multiple rows via
+#'       [tidyr::unnest_longer()]. **Warning:** this can significantly increase
+#'       the number of rows.}
+#'   }
 #'
-#' @return A tibble with roadwork details.
-#'
+#' @return A one-row tibble for the selected roadwork with the same columns as
+#' [autobahn_roadworks()]. `road_id` is typically `NA` for detail calls.
 #' @details
 #' Returns full details for a single roadwork entry.
-#' Official docs: https://autobahn.api.bund.dev.
+#' API documentation: \url{https://autobahn.api.bund.dev}.
 #'
 #' @seealso
 #' [autobahn_roadworks()] to list roadworks.
@@ -239,6 +437,7 @@ autobahn_parking_lorries <- function(road_id, flatten = FALSE, flatten_mode = "j
 #' roadworks <- autobahn_roadworks(roads$road_id[[1]])
 #' autobahn_roadwork_details(roadworks$identifier[[1]])
 #' }
+#' @family Autobahn
 #' @export
 autobahn_roadwork_details <- function(roadwork_id, flatten = FALSE, flatten_mode = "json") {
   bunddev_call_tidy(
@@ -253,15 +452,24 @@ autobahn_roadwork_details <- function(roadwork_id, flatten = FALSE, flatten_mode
 #' Get Autobahn warning details
 #'
 #' @param warning_id Warning identifier.
-#' @param flatten Logical; drop nested list columns.
-#' @param flatten_mode Flatten strategy for list columns. Use "unnest" to
-#'   expand list-columns into multiple rows.
+#' @param flatten Logical; if `TRUE`, simplify nested list columns according to
+#'   `flatten_mode`. Default `FALSE` keeps list columns as-is.
+#' @param flatten_mode How to handle list columns when `flatten = TRUE`:
+#'   \describe{
+#'     \item{`"drop"`}{Remove list columns entirely. Use when nested data is not
+#'       needed.}
+#'     \item{`"json"`}{Convert each list element to a JSON string. Preserves all
+#'       data in a text-queryable format. This is the **default**.}
+#'     \item{`"unnest"`}{Expand list columns into multiple rows via
+#'       [tidyr::unnest_longer()]. **Warning:** this can significantly increase
+#'       the number of rows.}
+#'   }
 #'
-#' @return A tibble with warning details.
-#'
+#' @return A one-row tibble for the selected warning with the same columns as
+#' [autobahn_warnings()]. `road_id` is typically `NA` for detail calls.
 #' @details
 #' Returns full details for a single warning entry.
-#' Official docs: https://autobahn.api.bund.dev.
+#' API documentation: \url{https://autobahn.api.bund.dev}.
 #'
 #' @seealso
 #' [autobahn_warnings()] to list warnings.
@@ -272,6 +480,7 @@ autobahn_roadwork_details <- function(roadwork_id, flatten = FALSE, flatten_mode
 #' warnings <- autobahn_warnings(roads$road_id[[1]])
 #' autobahn_warning_details(warnings$identifier[[1]])
 #' }
+#' @family Autobahn
 #' @export
 autobahn_warning_details <- function(warning_id, flatten = FALSE, flatten_mode = "json") {
   bunddev_call_tidy(
@@ -286,15 +495,24 @@ autobahn_warning_details <- function(warning_id, flatten = FALSE, flatten_mode =
 #' Get Autobahn webcam details
 #'
 #' @param webcam_id Webcam identifier.
-#' @param flatten Logical; drop nested list columns.
-#' @param flatten_mode Flatten strategy for list columns. Use "unnest" to
-#'   expand list-columns into multiple rows.
+#' @param flatten Logical; if `TRUE`, simplify nested list columns according to
+#'   `flatten_mode`. Default `FALSE` keeps list columns as-is.
+#' @param flatten_mode How to handle list columns when `flatten = TRUE`:
+#'   \describe{
+#'     \item{`"drop"`}{Remove list columns entirely. Use when nested data is not
+#'       needed.}
+#'     \item{`"json"`}{Convert each list element to a JSON string. Preserves all
+#'       data in a text-queryable format. This is the **default**.}
+#'     \item{`"unnest"`}{Expand list columns into multiple rows via
+#'       [tidyr::unnest_longer()]. **Warning:** this can significantly increase
+#'       the number of rows.}
+#'   }
 #'
-#' @return A tibble with webcam details.
-#'
+#' @return A one-row tibble for the selected webcam with the same columns as
+#' [autobahn_webcams()]. `road_id` is typically `NA` for detail calls.
 #' @details
 #' Returns full details for a single webcam entry.
-#' Official docs: https://autobahn.api.bund.dev.
+#' API documentation: \url{https://autobahn.api.bund.dev}.
 #'
 #' @seealso
 #' [autobahn_webcams()] to list webcams.
@@ -305,6 +523,7 @@ autobahn_warning_details <- function(warning_id, flatten = FALSE, flatten_mode =
 #' webcams <- autobahn_webcams(roads$road_id[[1]])
 #' autobahn_webcam_details(webcams$identifier[[1]])
 #' }
+#' @family Autobahn
 #' @export
 autobahn_webcam_details <- function(webcam_id, flatten = FALSE, flatten_mode = "json") {
   bunddev_call_tidy(
@@ -319,15 +538,24 @@ autobahn_webcam_details <- function(webcam_id, flatten = FALSE, flatten_mode = "
 #' Get Autobahn closure details
 #'
 #' @param closure_id Closure identifier.
-#' @param flatten Logical; drop nested list columns.
-#' @param flatten_mode Flatten strategy for list columns. Use "unnest" to
-#'   expand list-columns into multiple rows.
+#' @param flatten Logical; if `TRUE`, simplify nested list columns according to
+#'   `flatten_mode`. Default `FALSE` keeps list columns as-is.
+#' @param flatten_mode How to handle list columns when `flatten = TRUE`:
+#'   \describe{
+#'     \item{`"drop"`}{Remove list columns entirely. Use when nested data is not
+#'       needed.}
+#'     \item{`"json"`}{Convert each list element to a JSON string. Preserves all
+#'       data in a text-queryable format. This is the **default**.}
+#'     \item{`"unnest"`}{Expand list columns into multiple rows via
+#'       [tidyr::unnest_longer()]. **Warning:** this can significantly increase
+#'       the number of rows.}
+#'   }
 #'
-#' @return A tibble with closure details.
-#'
+#' @return A one-row tibble for the selected closure with the same columns as
+#' [autobahn_closures()]. `road_id` is typically `NA` for detail calls.
 #' @details
 #' Returns full details for a single closure entry.
-#' Official docs: https://autobahn.api.bund.dev.
+#' API documentation: \url{https://autobahn.api.bund.dev}.
 #'
 #' @seealso
 #' [autobahn_closures()] to list closures.
@@ -338,6 +566,7 @@ autobahn_webcam_details <- function(webcam_id, flatten = FALSE, flatten_mode = "
 #' closures <- autobahn_closures(roads$road_id[[1]])
 #' autobahn_closure_details(closures$identifier[[1]])
 #' }
+#' @family Autobahn
 #' @export
 autobahn_closure_details <- function(closure_id, flatten = FALSE, flatten_mode = "json") {
   bunddev_call_tidy(
@@ -352,15 +581,25 @@ autobahn_closure_details <- function(closure_id, flatten = FALSE, flatten_mode =
 #' Get Autobahn charging station details
 #'
 #' @param station_id Charging station identifier.
-#' @param flatten Logical; drop nested list columns.
-#' @param flatten_mode Flatten strategy for list columns. Use "unnest" to
-#'   expand list-columns into multiple rows.
+#' @param flatten Logical; if `TRUE`, simplify nested list columns according to
+#'   `flatten_mode`. Default `FALSE` keeps list columns as-is.
+#' @param flatten_mode How to handle list columns when `flatten = TRUE`:
+#'   \describe{
+#'     \item{`"drop"`}{Remove list columns entirely. Use when nested data is not
+#'       needed.}
+#'     \item{`"json"`}{Convert each list element to a JSON string. Preserves all
+#'       data in a text-queryable format. This is the **default**.}
+#'     \item{`"unnest"`}{Expand list columns into multiple rows via
+#'       [tidyr::unnest_longer()]. **Warning:** this can significantly increase
+#'       the number of rows.}
+#'   }
 #'
-#' @return A tibble with charging station details.
-#'
+#' @return A one-row tibble for the selected charging station with the same
+#' columns as [autobahn_charging_stations()]. `road_id` is typically `NA` for
+#' detail calls.
 #' @details
 #' Returns full details for a single charging station entry.
-#' Official docs: https://autobahn.api.bund.dev.
+#' API documentation: \url{https://autobahn.api.bund.dev}.
 #'
 #' @seealso
 #' [autobahn_charging_stations()] to list stations.
@@ -371,6 +610,7 @@ autobahn_closure_details <- function(closure_id, flatten = FALSE, flatten_mode =
 #' stations <- autobahn_charging_stations(roads$road_id[[1]])
 #' autobahn_charging_station_details(stations$identifier[[1]])
 #' }
+#' @family Autobahn
 #' @export
 autobahn_charging_station_details <- function(station_id, flatten = FALSE, flatten_mode = "json") {
   bunddev_call_tidy(
@@ -385,15 +625,25 @@ autobahn_charging_station_details <- function(station_id, flatten = FALSE, flatt
 #' Get Autobahn lorry parking details
 #'
 #' @param lorry_id Lorry parking identifier.
-#' @param flatten Logical; drop nested list columns.
-#' @param flatten_mode Flatten strategy for list columns. Use "unnest" to
-#'   expand list-columns into multiple rows.
+#' @param flatten Logical; if `TRUE`, simplify nested list columns according to
+#'   `flatten_mode`. Default `FALSE` keeps list columns as-is.
+#' @param flatten_mode How to handle list columns when `flatten = TRUE`:
+#'   \describe{
+#'     \item{`"drop"`}{Remove list columns entirely. Use when nested data is not
+#'       needed.}
+#'     \item{`"json"`}{Convert each list element to a JSON string. Preserves all
+#'       data in a text-queryable format. This is the **default**.}
+#'     \item{`"unnest"`}{Expand list columns into multiple rows via
+#'       [tidyr::unnest_longer()]. **Warning:** this can significantly increase
+#'       the number of rows.}
+#'   }
 #'
-#' @return A tibble with lorry parking details.
-#'
+#' @return A one-row tibble for the selected lorry-parking entry with the same
+#' columns as [autobahn_parking_lorries()]. `road_id` is typically `NA` for
+#' detail calls.
 #' @details
 #' Returns full details for a single lorry parking entry.
-#' Official docs: https://autobahn.api.bund.dev.
+#' API documentation: \url{https://autobahn.api.bund.dev}.
 #'
 #' @seealso
 #' [autobahn_parking_lorries()] to list parking areas.
@@ -404,6 +654,7 @@ autobahn_charging_station_details <- function(station_id, flatten = FALSE, flatt
 #' parking <- autobahn_parking_lorries(roads$road_id[[1]])
 #' autobahn_parking_lorry_details(parking$identifier[[1]])
 #' }
+#' @family Autobahn
 #' @export
 autobahn_parking_lorry_details <- function(lorry_id, flatten = FALSE, flatten_mode = "json") {
   bunddev_call_tidy(

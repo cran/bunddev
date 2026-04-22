@@ -1,12 +1,13 @@
 #' List available places
 #'
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
 #' The Abfallnavi API provides waste collection data for supported regions.
-#' Start by listing places (Orte) to obtain an `ortId`. Official docs:
-#' https://bundesapi.github.io/abfallnavi-api/.
+#' Start by listing places (Orte) to obtain an `ortId`. API documentation: \url{https://abfallnavi.api.bund.dev/}.
 #'
 #' @seealso
 #' [abfallnavi_strassen()] for streets in a place.
@@ -16,7 +17,12 @@
 #' abfallnavi_orte()
 #' }
 #'
-#' @return A tibble with places.
+#' @return A [tibble][tibble::tibble] with one row per place and columns:
+#'   \describe{
+#'     \item{id}{Integer. Place identifier.}
+#'     \item{name}{Character. Place name.}
+#'   }
+#' @family Abfallnavi
 #' @export
 abfallnavi_orte <- function(safe = TRUE, refresh = FALSE) {
   response <- bunddev_call(
@@ -33,11 +39,17 @@ abfallnavi_orte <- function(safe = TRUE, refresh = FALSE) {
 #' Get a place by id
 #'
 #' @param ort_id Place id.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
-#' @return A tibble with place metadata.
-#'
+#' @return A one-row [tibble][tibble::tibble] with columns:
+#'   \describe{
+#'     \item{id}{Integer. Place identifier.}
+#'     \item{name}{Character. Place name.}
+#'   }
+#' @family Abfallnavi
 #' @export
 abfallnavi_ort <- function(ort_id, safe = TRUE, refresh = FALSE) {
   response <- bunddev_call(
@@ -55,11 +67,22 @@ abfallnavi_ort <- function(ort_id, safe = TRUE, refresh = FALSE) {
 #' List streets for a place
 #'
 #' @param ort_id Place id.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
-#' @return A tibble with streets.
-#'
+#' @return A [tibble][tibble::tibble] with one row per street and columns:
+#'   \describe{
+#'     \item{id}{Integer. Street identifier.}
+#'     \item{name}{Character. Street name.}
+#'     \item{staticId}{Character. Static identifier (base64-encoded).}
+#'     \item{hausNrList}{List. House numbers for this street.}
+#'     \item{plz}{Character. Postal code (may be `NA`).}
+#'     \item{ortsteilName}{Character. District name.}
+#'     \item{ort}{List. Nested place object.}
+#'   }
+#' @family Abfallnavi
 #' @export
 abfallnavi_strassen <- function(ort_id, safe = TRUE, refresh = FALSE) {
   response <- bunddev_call(
@@ -77,11 +100,19 @@ abfallnavi_strassen <- function(ort_id, safe = TRUE, refresh = FALSE) {
 #' List house numbers for a street
 #'
 #' @param strassen_id Street id.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
-#' @return A tibble with house numbers.
-#'
+#' @return A [tibble][tibble::tibble] with one row per house number and columns:
+#'   \describe{
+#'     \item{id}{Integer. House number identifier.}
+#'     \item{nr}{Character. House number label.}
+#'     \item{plz}{Character. Postal code.}
+#'     \item{staticId}{Character. Static identifier (base64-encoded).}
+#'   }
+#' @family Abfallnavi
 #' @export
 abfallnavi_hausnummern <- function(strassen_id, safe = TRUE, refresh = FALSE) {
   response <- bunddev_call(
@@ -98,11 +129,19 @@ abfallnavi_hausnummern <- function(strassen_id, safe = TRUE, refresh = FALSE) {
 
 #' List waste fractions
 #'
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
-#' @return A tibble with waste fractions.
-#'
+#' @return A [tibble][tibble::tibble] with one row per waste fraction and columns:
+#'   \describe{
+#'     \item{id}{Integer. Fraction identifier.}
+#'     \item{name}{Character. Fraction name (e.g. "Restabfall").}
+#'     \item{iconNr}{Integer. Icon number for display.}
+#'     \item{farbeRgb}{Character. RGB colour hex code.}
+#'   }
+#' @family Abfallnavi
 #' @export
 abfallnavi_fraktionen <- function(safe = TRUE, refresh = FALSE) {
   response <- bunddev_call(
@@ -119,11 +158,19 @@ abfallnavi_fraktionen <- function(safe = TRUE, refresh = FALSE) {
 #' List waste fractions for a house number
 #'
 #' @param hausnummern_id House number id.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
-#' @return A tibble with waste fractions.
-#'
+#' @return A [tibble][tibble::tibble] with one row per waste fraction and columns:
+#'   \describe{
+#'     \item{id}{Integer. Fraction identifier.}
+#'     \item{name}{Character. Fraction name (e.g. "Restabfall").}
+#'     \item{iconNr}{Integer. Icon number for display.}
+#'     \item{farbeRgb}{Character. RGB colour hex code.}
+#'   }
+#' @family Abfallnavi
 #' @export
 abfallnavi_fraktionen_hausnummern <- function(hausnummern_id, safe = TRUE, refresh = FALSE) {
   response <- bunddev_call(
@@ -141,11 +188,19 @@ abfallnavi_fraktionen_hausnummern <- function(hausnummern_id, safe = TRUE, refre
 #' List waste fractions for a street
 #'
 #' @param strassen_id Street id.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
-#' @return A tibble with waste fractions.
-#'
+#' @return A [tibble][tibble::tibble] with one row per waste fraction and columns:
+#'   \describe{
+#'     \item{id}{Integer. Fraction identifier.}
+#'     \item{name}{Character. Fraction name (e.g. "Restabfall").}
+#'     \item{iconNr}{Integer. Icon number for display.}
+#'     \item{farbeRgb}{Character. RGB colour hex code.}
+#'   }
+#' @family Abfallnavi
 #' @export
 abfallnavi_fraktionen_strassen <- function(strassen_id, safe = TRUE, refresh = FALSE) {
   response <- bunddev_call(
@@ -164,13 +219,19 @@ abfallnavi_fraktionen_strassen <- function(strassen_id, safe = TRUE, refresh = F
 #'
 #' @param strassen_id Street id.
 #' @param fraktion Fraction ids.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
-#' @return A tibble with collection dates.
-#'
-#' Includes `date_time` as POSIXct in Europe/Berlin.
-#'
+#' @return A [tibble][tibble::tibble] with one row per collection date and columns:
+#'   \describe{
+#'     \item{id}{Integer. Collection event identifier.}
+#'     \item{bezirk}{List. District information for this collection.}
+#'     \item{datum}{Character. Collection date (YYYY-MM-DD).}
+#'     \item{date_time}{POSIXct. Parsed collection date (Europe/Berlin).}
+#'   }
+#' @family Abfallnavi
 #' @export
 abfallnavi_termine_strassen <- function(strassen_id, fraktion, safe = TRUE, refresh = FALSE) {
   response <- bunddev_call(
@@ -189,13 +250,19 @@ abfallnavi_termine_strassen <- function(strassen_id, fraktion, safe = TRUE, refr
 #'
 #' @param hausnummern_id House number id.
 #' @param fraktion Fraction ids.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
-#' @return A tibble with collection dates.
-#'
-#' Includes `date_time` as POSIXct in Europe/Berlin.
-#'
+#' @return A [tibble][tibble::tibble] with one row per collection date and columns:
+#'   \describe{
+#'     \item{id}{Integer. Collection event identifier.}
+#'     \item{bezirk}{List. District information for this collection.}
+#'     \item{datum}{Character. Collection date (YYYY-MM-DD).}
+#'     \item{date_time}{POSIXct. Parsed collection date (Europe/Berlin).}
+#'   }
+#' @family Abfallnavi
 #' @export
 abfallnavi_termine_hausnummern <- function(hausnummern_id, fraktion, safe = TRUE, refresh = FALSE) {
   response <- bunddev_call(
@@ -219,13 +286,22 @@ abfallnavi_termine_hausnummern <- function(hausnummern_id, fraktion, safe = TRUE
 #' @param strasse Street id.
 #' @param hnr House number id.
 #' @param fraktion Fraction ids.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
 #' Downloads a calendar file for the requested address and fraction.
 #'
-#' @return A tibble with raw file bytes.
+#' @return A one-row [tibble][tibble::tibble] with columns:
+#'   \describe{
+#'     \item{region}{Character. Region code passed to the request.}
+#'     \item{format}{Character. File format ("pdf" or "ics").}
+#'     \item{jahr}{Integer. Year passed to the request.}
+#'     \item{bytes}{List. Raw file bytes (raw vector).}
+#'   }
+#' @family Abfallnavi
 #' @export
 abfallnavi_kalender_download <- function(region,
                                          format,

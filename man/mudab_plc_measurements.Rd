@@ -19,19 +19,41 @@ mudab_plc_measurements(
 
 \item{orderby}{Optional ordering specification.}
 
-\item{safe}{Logical; apply throttling and caching.}
+\item{safe}{Logical; if \code{TRUE} (default), apply rate-limiting and cache
+GET responses to \code{tools::R_user_dir("bunddev", "cache")}.}
 
-\item{refresh}{Logical; refresh cached responses.}
+\item{refresh}{Logical; if \code{TRUE}, ignore cached responses and re-fetch
+from the API (default \code{FALSE}).}
 }
 \value{
-A tibble with PLC measurements.
+A \link[tibble:tibble]{tibble} with one row per PLC measurement and columns:
+\describe{
+\item{metadataid}{Integer. Metadata identifier.}
+\item{NUMMER}{Integer. Running row number.}
+\item{NAME}{Integer. Measurement name code.}
+\item{STATION_CODE}{Character. Station code.}
+\item{STATION_NAME}{Character. Station name.}
+\item{VALUE}{Numeric. Measured value.}
+\item{PARAM_TYPE}{Character. Aggregation type ("TOT" or "AVE").}
+\item{PARAM_ID}{Character. Numeric code for NAME.}
+\item{PERIOD_NAME}{Character. Measurement period (year).}
+\item{PERIOD_TYPE}{Character. Aggregation duration ("A").}
+\item{LAND_CD}{Character. Federal state code.}
+\item{ST_LAT}{Numeric. Latitude.}
+\item{ST_LON}{Numeric. Longitude.}
+\item{SUBCM_CODE}{Character. Sub-compartment code.}
+\item{SUBCM_NAME}{Character. Sub-compartment name.}
+\item{MON_TYPE}{Character. Monitoring type.}
+\item{VAL_UNIT}{Character. Measurement unit.}
+\item{AREA}{Numeric. Area value.}
+}
 }
 \description{
 List MUDAB PLC measurement values
 }
 \details{
 Returns PLC station measurement values.
-Official docs: https://mudab.api.bund.dev.
+API documentation: \url{https://mudab.api.bund.dev}.
 }
 \examples{
 \dontrun{
@@ -39,3 +61,17 @@ mudab_plc_measurements(range = list(from = 0, count = 5))
 }
 
 }
+\seealso{
+Other MUDAB: 
+\code{\link{mudab_parameter_values}()},
+\code{\link{mudab_parameters}()},
+\code{\link{mudab_parameters_biologie}()},
+\code{\link{mudab_parameters_biota}()},
+\code{\link{mudab_parameters_sediment}()},
+\code{\link{mudab_parameters_wasser}()},
+\code{\link{mudab_plc_parameters}()},
+\code{\link{mudab_plc_stations}()},
+\code{\link{mudab_project_stations}()},
+\code{\link{mudab_stations}()}
+}
+\concept{MUDAB}

@@ -2,7 +2,9 @@
 #'
 #' @details
 #' The cache directory is used to store downloaded OpenAPI specs and cached
-#' API responses. Use this to inspect or clean cached files.
+#' API responses. During `R CMD check`, `bunddev` uses a temporary cache
+#' directory to avoid leaving persistent files behind. Use this to inspect or
+#' clean cached files.
 #'
 #' @seealso
 #' [bunddev_spec()] to download specs, and [bunddev_spec_path()] to locate
@@ -13,14 +15,33 @@
 #' bunddev_cache_dir()
 #' }
 #'
-#' @return Cache directory path.
+#' @return Path to the `bunddev` cache directory (character scalar).
+#' @family OpenAPI
 #' @export
 bunddev_cache_dir <- function() {
-  cache_dir <- tools::R_user_dir("bunddev", "cache")
+  cache_dir <- bunddev_cache_root()
   if (!dir.exists(cache_dir)) {
     dir.create(cache_dir, recursive = TRUE, showWarnings = FALSE)
   }
   cache_dir
+}
+
+bunddev_cache_root <- function() {
+  cache_dir <- Sys.getenv("BUNDDEV_CACHE_DIR", unset = "")
+  if (nzchar(cache_dir)) {
+    return(cache_dir)
+  }
+
+  if (bunddev_is_checking()) {
+    return(file.path(tempdir(), "bunddev"))
+  }
+
+  tools::R_user_dir("bunddev", "cache")
+}
+
+bunddev_is_checking <- function() {
+  nzchar(Sys.getenv("_R_CHECK_PACKAGE_NAME_", unset = "")) ||
+    nzchar(Sys.getenv("R_CMD_CHECK", unset = ""))
 }
 
 #' Build a cache path for an API spec
@@ -38,7 +59,8 @@ bunddev_cache_dir <- function() {
 #' bunddev_spec_path("smard")
 #' }
 #'
-#' @return File path for the cached spec.
+#' @return File path where the API specification is cached (character scalar).
+#' @family OpenAPI
 #' @export
 bunddev_spec_path <- function(id) {
   info <- bunddev_info(id)
@@ -54,7 +76,8 @@ bunddev_spec_path <- function(id) {
 #' Retrieve a cached API spec
 #'
 #' @param id Registry id.
-#' @param refresh Logical; refresh cached spec.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
 #' Downloads the OpenAPI spec from the registry if it is missing or when
@@ -69,7 +92,8 @@ bunddev_spec_path <- function(id) {
 #' bunddev_spec("smard")
 #' }
 #'
-#' @return Parsed OpenAPI spec.
+#' @return Parsed OpenAPI specification as a nested list.
+#' @family OpenAPI
 #' @export
 bunddev_spec <- function(id, refresh = FALSE) {
   info <- bunddev_info(id)
@@ -106,7 +130,7 @@ bunddev_spec <- function(id, refresh = FALSE) {
 }
 
 bunddev_response_cache_dir <- function() {
-  cache_dir <- file.path(tools::R_user_dir("bunddev", "cache"), "responses")
+  cache_dir <- file.path(bunddev_cache_dir(), "responses")
   if (!dir.exists(cache_dir)) {
     dir.create(cache_dir, recursive = TRUE, showWarnings = FALSE)
   }

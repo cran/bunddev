@@ -19,19 +19,28 @@ mudab_stations(
 
 \item{orderby}{Optional ordering specification.}
 
-\item{safe}{Logical; apply throttling and caching.}
+\item{safe}{Logical; if \code{TRUE} (default), apply rate-limiting and cache
+GET responses to \code{tools::R_user_dir("bunddev", "cache")}.}
 
-\item{refresh}{Logical; refresh cached responses.}
+\item{refresh}{Logical; if \code{TRUE}, ignore cached responses and re-fetch
+from the API (default \code{FALSE}).}
 }
 \value{
-A tibble with stations.
+A \link[tibble:tibble]{tibble} with one row per measurement station and columns:
+\describe{
+\item{metadataid}{Integer. Metadata identifier.}
+\item{STATNAME_ST}{Character. Station name.}
+\item{NAME_PS}{Character. Project station name.}
+\item{STATIONTYPE_ST}{Character. Station type.}
+\item{COMPT_DS}{Character. Compartment code (BL, CW, CS, or CF).}
+}
 }
 \description{
 List MUDAB stations
 }
 \details{
 Returns measurement stations from the MUDAB database.
-Official docs: https://mudab.api.bund.dev.
+API documentation: \url{https://mudab.api.bund.dev}.
 }
 \examples{
 \dontrun{
@@ -39,3 +48,17 @@ mudab_stations(range = list(from = 0, count = 5))
 }
 
 }
+\seealso{
+Other MUDAB: 
+\code{\link{mudab_parameter_values}()},
+\code{\link{mudab_parameters}()},
+\code{\link{mudab_parameters_biologie}()},
+\code{\link{mudab_parameters_biota}()},
+\code{\link{mudab_parameters_sediment}()},
+\code{\link{mudab_parameters_wasser}()},
+\code{\link{mudab_plc_measurements}()},
+\code{\link{mudab_plc_parameters}()},
+\code{\link{mudab_plc_stations}()},
+\code{\link{mudab_project_stations}()}
+}
+\concept{MUDAB}

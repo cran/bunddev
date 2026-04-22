@@ -9,14 +9,25 @@ nina_warning_json(identifier, safe = TRUE, refresh = FALSE)
 \arguments{
 \item{identifier}{Warning identifier.}
 
-\item{safe}{Logical; apply throttling and caching.}
+\item{safe}{Logical; if \code{TRUE} (default), apply rate-limiting and cache
+GET responses to \code{tools::R_user_dir("bunddev", "cache")}.}
 
-\item{refresh}{Logical; refresh cached responses.}
+\item{refresh}{Logical; if \code{TRUE}, ignore cached responses and re-fetch
+from the API (default \code{FALSE}).}
 }
 \value{
-A tibble with warning details.
-
-Includes \code{sent_time} as POSIXct in Europe/Berlin.
+A one-row tibble with CAP warning fields.
+\describe{
+\item{identifier}{Warning identifier (character).}
+\item{sender}{Sender identifier (character).}
+\item{sent}{Sent timestamp string (character).}
+\item{status}{Alert status (character).}
+\item{msg_type}{Message type (character).}
+\item{scope}{Alert scope (character).}
+\item{code}{Alert code entries (list).}
+\item{info}{Alert info blocks (list).}
+\item{sent_time}{Parsed sent timestamp (\code{POSIXct}, Europe/Berlin).}
+}
 }
 \description{
 Get a NINA warning (JSON)
@@ -33,4 +44,27 @@ nina_warning_json(map$id[[1]])
 }
 \seealso{
 \code{\link[=nina_mapdata]{nina_mapdata()}} to discover identifiers.
+
+Other NINA: 
+\code{\link{nina_archive_mowas}()},
+\code{\link{nina_archive_mowas_mapping}()},
+\code{\link{nina_covid_infos}()},
+\code{\link{nina_covid_map}()},
+\code{\link{nina_covid_rules}()},
+\code{\link{nina_covid_ticker}()},
+\code{\link{nina_covid_ticker_message}()},
+\code{\link{nina_dashboard}()},
+\code{\link{nina_event_code}()},
+\code{\link{nina_event_codes}()},
+\code{\link{nina_faqs}()},
+\code{\link{nina_logo}()},
+\code{\link{nina_logos}()},
+\code{\link{nina_mapdata}()},
+\code{\link{nina_mowas_rss}()},
+\code{\link{nina_notfalltipps}()},
+\code{\link{nina_version}()},
+\code{\link{nina_warning}()},
+\code{\link{nina_warning_geojson}()},
+\code{\link{nina_warnings}()}
 }
+\concept{NINA}

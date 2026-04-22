@@ -13,19 +13,28 @@ bundesrat_plenum_naechste_sitzungen(
 \arguments{
 \item{view}{Rendering mode for the XML output.}
 
-\item{safe}{Logical; apply throttling and caching.}
+\item{safe}{Logical; if \code{TRUE} (default), apply rate-limiting and cache
+GET responses to \code{tools::R_user_dir("bunddev", "cache")}.}
 
-\item{refresh}{Logical; refresh cached responses.}
+\item{refresh}{Logical; if \code{TRUE}, ignore cached responses and re-fetch
+from the API (default \code{FALSE}).}
 }
 \value{
-A tibble with upcoming session metadata.
+A tibble with one row per XML \verb{<item>} in the upcoming sessions feed.
+Column names correspond to the XML child element names.
+\describe{
+\item{\verb{<tag>}}{One column per unique scalar child element (character).}
+\item{\verb{<repeated_tag>}}{List-column when a child element name appears more
+than once in a single \verb{<item>}.}
+\item{date_time, dateOfIssue_time, imageDate_time, layoutDate_time, startdate_time, stopdate_time}{Parsed \code{POSIXct} (Europe/Berlin) added when the corresponding source
+field is present.}
+}
 }
 \description{
 Get Bundesrat upcoming plenum sessions
 }
 \details{
-Returns upcoming Bundesrat sessions. Official docs:
-https://bundesrat.api.bund.dev.
+Returns upcoming Bundesrat sessions. API documentation: \url{https://bundesrat.api.bund.dev}.
 }
 \examples{
 \dontrun{
@@ -33,3 +42,16 @@ bundesrat_plenum_naechste_sitzungen()
 }
 
 }
+\seealso{
+Other Bundesrat: 
+\code{\link{bundesrat_aktuelles}()},
+\code{\link{bundesrat_mitglieder}()},
+\code{\link{bundesrat_plenum_aktuelle_sitzung}()},
+\code{\link{bundesrat_plenum_chronologisch}()},
+\code{\link{bundesrat_plenum_kompakt}()},
+\code{\link{bundesrat_praesidium}()},
+\code{\link{bundesrat_startlist}()},
+\code{\link{bundesrat_stimmverteilung}()},
+\code{\link{bundesrat_termine}()}
+}
+\concept{Bundesrat}

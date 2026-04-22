@@ -7,17 +7,38 @@
 luftqualitaet_airquality_limits(safe = TRUE, refresh = FALSE)
 }
 \arguments{
-\item{safe}{Logical; apply throttling and caching.}
+\item{safe}{Logical; if \code{TRUE} (default), apply rate-limiting and cache
+GET responses to \code{tools::R_user_dir("bunddev", "cache")}.}
 
-\item{refresh}{Logical; refresh cached responses.}
+\item{refresh}{Logical; if \code{TRUE}, ignore cached responses and re-fetch
+from the API (default \code{FALSE}).}
 }
 \value{
-A tibble with date limits.
+A \link[tibble:tibble]{tibble} with one row per station. Column names
+are derived from the \code{indices} metadata in the API response and
+typically include a \code{station_id} key column followed by
+\code{limit date start min (CET)} and \code{limit date start max (CET)}.
 }
 \description{
 Get air quality date limits
 }
 \details{
-Returns date limits for air quality measurements. Official docs:
-https://luftqualitaet.api.bund.dev.
+Returns date limits for air quality measurements. API documentation: \url{https://luftqualitaet.api.bund.dev}.
 }
+\seealso{
+Other Luftqualitaet: 
+\code{\link{luftqualitaet_airquality}()},
+\code{\link{luftqualitaet_annualbalances}()},
+\code{\link{luftqualitaet_components}()},
+\code{\link{luftqualitaet_measures}()},
+\code{\link{luftqualitaet_measures_limits}()},
+\code{\link{luftqualitaet_meta}()},
+\code{\link{luftqualitaet_networks}()},
+\code{\link{luftqualitaet_scopes}()},
+\code{\link{luftqualitaet_stationsettings}()},
+\code{\link{luftqualitaet_stationtypes}()},
+\code{\link{luftqualitaet_thresholds}()},
+\code{\link{luftqualitaet_transgressions}()},
+\code{\link{luftqualitaet_transgressiontypes}()}
+}
+\concept{Luftqualitaet}

@@ -9,20 +9,51 @@ autobahn_charging_stations(road_id, flatten = FALSE, flatten_mode = "json")
 \arguments{
 \item{road_id}{Road identifier.}
 
-\item{flatten}{Logical; drop nested list columns.}
+\item{flatten}{Logical; if \code{TRUE}, simplify nested list columns according to
+\code{flatten_mode}. Default \code{FALSE} keeps list columns as-is.}
 
-\item{flatten_mode}{Flatten strategy for list columns. Use "unnest" to
-expand list-columns into multiple rows.}
+\item{flatten_mode}{How to handle list columns when \code{flatten = TRUE}:
+\describe{
+\item{\code{"drop"}}{Remove list columns entirely. Use when nested data is not
+needed.}
+\item{\code{"json"}}{Convert each list element to a JSON string. Preserves all
+data in a text-queryable format. This is the \strong{default}.}
+\item{\code{"unnest"}}{Expand list columns into multiple rows via
+\code{\link[tidyr:unnest_longer]{tidyr::unnest_longer()}}. \strong{Warning:} this can significantly increase
+the number of rows.}
+}}
 }
 \value{
-A tibble with charging stations.
+A tibble with one row per charging-station entry:
+\describe{
+\item{road_id}{Road identifier (character).}
+\item{identifier}{Entry identifier (character).}
+\item{title}{Title (character).}
+\item{subtitle}{Subtitle (character).}
+\item{display_type}{Display type (character).}
+\item{icon}{Icon identifier (character).}
+\item{is_blocked}{Whether the road is blocked (logical).}
+\item{future}{Whether the entry is future-dated (logical).}
+\item{start_timestamp}{Start timestamp string (character).}
+\item{start_time}{Parsed start time (POSIXct).}
+\item{point}{Point coordinate string (character).}
+\item{extent}{Extent coordinate string (character).}
+\item{coordinate_lat}{Latitude (character).}
+\item{coordinate_long}{Longitude (character).}
+\item{description}{Description text (character).}
+\item{footer}{Footer text (character).}
+\item{route_recommendation}{Route recommendations (list-column).}
+\item{lorry_parking_feature_icons}{Lorry parking feature icons (list-column).}
+}
+With \code{flatten = TRUE}, the two list-columns are transformed according to
+\code{flatten_mode}.
 }
 \description{
 List Autobahn charging stations
 }
 \details{
 Returns charging stations for a specific Autobahn road id.
-Official docs: https://autobahn.api.bund.dev.
+API documentation: \url{https://autobahn.api.bund.dev}.
 }
 \examples{
 \dontrun{
@@ -32,4 +63,19 @@ autobahn_charging_stations(roads$road_id[[1]], flatten = TRUE)
 }
 \seealso{
 \code{\link[=autobahn_roads]{autobahn_roads()}} and \code{\link[=autobahn_charging_station_details]{autobahn_charging_station_details()}}.
+
+Other Autobahn: 
+\code{\link{autobahn_charging_station_details}()},
+\code{\link{autobahn_closure_details}()},
+\code{\link{autobahn_closures}()},
+\code{\link{autobahn_parking_lorries}()},
+\code{\link{autobahn_parking_lorry_details}()},
+\code{\link{autobahn_roads}()},
+\code{\link{autobahn_roadwork_details}()},
+\code{\link{autobahn_roadworks}()},
+\code{\link{autobahn_warning_details}()},
+\code{\link{autobahn_warnings}()},
+\code{\link{autobahn_webcam_details}()},
+\code{\link{autobahn_webcams}()}
 }
+\concept{Autobahn}

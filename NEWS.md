@@ -1,3 +1,40 @@
+# bunddev 0.2.3
+
+## CRAN resubmission
+
+- Replace outdated documentation URLs that redirected during CRAN incoming
+  checks with direct `https://*.api.bund.dev/` URLs.
+- Reword the package description to avoid a CRAN spell-check note on
+  "tibbles".
+
+# bunddev 0.2.2
+
+## CRAN resubmission
+
+- Use a temporary cache directory during `R CMD check` to avoid persistent
+  cache writes in user space.
+- Harden network-dependent tests so upstream DNS / HTTP failures skip cleanly
+  instead of failing package checks.
+
+# bunddev 0.2.1
+
+## Documentation
+
+- Expanded function documentation across core modules and all adapters:
+  - standardized `safe` / `refresh` parameter wording,
+  - fully documented `flatten` / `flatten_mode` behavior,
+  - added explicit return-structure descriptions for adapter and core helpers.
+- Improved parameter discoverability:
+  - added detailed `@param params` documentation where stable,
+  - added consistent `@seealso` links to `bunddev_parameters()` for functions with query params.
+- Standardized upstream API links in help pages (`API documentation: \\url{...}`).
+
+## pkgdown
+
+- Added `@family` coverage across exported functions for better reference grouping.
+- Reorganized `_pkgdown.yml` reference sections by core topics and adapter families.
+- Added `bunddev_ms_to_posix()` and `bunddev_timestamp_to_ms()` to the pkgdown reference index.
+
 # bunddev 0.2.0
 
 ## Bug Fixes

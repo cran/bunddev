@@ -9,20 +9,25 @@ hochwasserzentralen_pegel_info(pegelnummer, safe = TRUE, refresh = FALSE)
 \arguments{
 \item{pegelnummer}{Pegelnummer identifier (e.g., "HE_24820206").}
 
-\item{safe}{Logical; apply throttling and caching.}
+\item{safe}{Logical; if \code{TRUE} (default), apply rate-limiting and cache
+GET responses to \code{tools::R_user_dir("bunddev", "cache")}.}
 
-\item{refresh}{Logical; refresh cached responses.}
+\item{refresh}{Logical; if \code{TRUE}, ignore cached responses and re-fetch
+from the API (default \code{FALSE}).}
 }
 \value{
-A tibble with pegel metadata.
+A one-row tibble of gauge metadata for the selected \code{pegelnummer}.
+Columns are created dynamically from the upstream service response fields.
+If the response contains GeoJSON features, each feature's \code{properties} are
+used as columns; otherwise each top-level field becomes a column. Scalar
+values become atomic columns and nested structures become list-columns.
 }
 \description{
 Get flood gauge information
 }
 \details{
 Returns metadata for a single flood gauge (pegel) from
-hochwasserzentralen.de. Official docs:
-https://bundesapi.github.io/hochwasserzentralen-api/.
+hochwasserzentralen.de. API documentation: \url{https://hochwasserzentralen.api.bund.dev/}.
 }
 \examples{
 \dontrun{
@@ -30,3 +35,11 @@ hochwasserzentralen_pegel_info("HE_24820206")
 }
 
 }
+\seealso{
+Other Hochwasserzentralen: 
+\code{\link{hochwasserzentralen_bundeslaender}()},
+\code{\link{hochwasserzentralen_bundesland_geojson}()},
+\code{\link{hochwasserzentralen_bundesland_info}()},
+\code{\link{hochwasserzentralen_lagepegel}()}
+}
+\concept{Hochwasserzentralen}

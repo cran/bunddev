@@ -13,20 +13,58 @@ diga_questionnaires(
 )
 }
 \arguments{
-\item{params}{Query parameters.}
+\item{params}{Named list of FHIR search parameters:
+\describe{
+\item{\verb{_count}}{Maximum bundle size per request (integer, default \code{1000}).}
+\item{\verb{_profile}}{FHIR profile URL used to restrict resource type (character).}
+}}
 
-\item{safe}{Logical; apply throttling and caching.}
+\item{safe}{Logical; if \code{TRUE} (default), apply rate-limiting and cache
+GET responses to \code{tools::R_user_dir("bunddev", "cache")}.}
 
-\item{refresh}{Logical; refresh cached responses.}
+\item{refresh}{Logical; if \code{TRUE}, ignore cached responses and re-fetch
+from the API (default \code{FALSE}).}
 
-\item{flatten}{Logical; drop nested list columns.}
+\item{flatten}{Logical; if \code{TRUE}, simplify nested list columns according to
+\code{flatten_mode}. Default \code{FALSE} keeps list columns as-is.}
 
-\item{flatten_mode}{Flatten strategy for list columns.}
+\item{flatten_mode}{How to handle list columns when \code{flatten = TRUE}:
+\describe{
+\item{\code{"drop"}}{Remove list columns entirely. Use when nested data is not
+needed.}
+\item{\code{"json"}}{Convert each list element to a JSON string. Preserves all
+data in a text-queryable format. This is the \strong{default}.}
+\item{\code{"unnest"}}{Expand list columns into multiple rows via
+\code{\link[tidyr:unnest_longer]{tidyr::unnest_longer()}}. \strong{Warning:} this can significantly increase
+the number of rows.}
+}}
 }
 \value{
-A tibble containing DiGA questionnaire resources from the FHIR API.
-Structure depends on \code{flatten} setting.
+A \link[tibble:tibble]{tibble} with one row per questionnaire and columns:
+\describe{
+\item{resourceType}{Character. FHIR resource type, always \code{"Questionnaire"}.}
+\item{id}{Character. FHIR resource identifier.}
+\item{url}{Character. Canonical URL of the resource.}
+\item{status}{Character. Publication status.}
+\item{name}{Character. Computer-friendly name.}
+\item{title}{Character. Human-readable title.}
+\item{meta}{List. Resource metadata (profile, timestamps).}
+\item{identifier}{List. Business identifiers.}
+\item{item}{List. Questionnaire items and groups.}
+\item{extension}{List. FHIR profile extensions.}
+}
 }
 \description{
 List DiGA questionnaires
 }
+\seealso{
+\code{\link[=bunddev_parameters]{bunddev_parameters()}} to inspect available query parameters.
+
+Other DiGA: 
+\code{\link{diga_catalog_entries}()},
+\code{\link{diga_charge_item_definitions}()},
+\code{\link{diga_device_definitions}()},
+\code{\link{diga_organizations}()},
+\code{\link{diga_questionnaire_responses}()}
+}
+\concept{DiGA}

@@ -7,20 +7,25 @@
 hochwasserzentralen_lagepegel(safe = TRUE, refresh = FALSE)
 }
 \arguments{
-\item{safe}{Logical; apply throttling and caching.}
+\item{safe}{Logical; if \code{TRUE} (default), apply rate-limiting and cache
+GET responses to \code{tools::R_user_dir("bunddev", "cache")}.}
 
-\item{refresh}{Logical; refresh cached responses.}
+\item{refresh}{Logical; if \code{TRUE}, ignore cached responses and re-fetch
+from the API (default \code{FALSE}).}
 }
 \value{
-A tibble with pegel coordinates.
+A tibble with one row per gauge location. Columns are created
+dynamically from the upstream service response fields. If the response
+contains GeoJSON features, each feature's \code{properties} are used as columns;
+otherwise each top-level field becomes a column. Scalar values become atomic
+columns and nested structures become list-columns.
 }
 \description{
 List flood gauge locations
 }
 \details{
 Returns latitude/longitude coordinates for all pegel identifiers available
-in the hochwasserzentralen.de portal. Official docs:
-https://bundesapi.github.io/hochwasserzentralen-api/.
+in the hochwasserzentralen.de portal. API documentation: \url{https://hochwasserzentralen.api.bund.dev/}.
 }
 \examples{
 \dontrun{
@@ -28,3 +33,11 @@ hochwasserzentralen_lagepegel()
 }
 
 }
+\seealso{
+Other Hochwasserzentralen: 
+\code{\link{hochwasserzentralen_bundeslaender}()},
+\code{\link{hochwasserzentralen_bundesland_geojson}()},
+\code{\link{hochwasserzentralen_bundesland_info}()},
+\code{\link{hochwasserzentralen_pegel_info}()}
+}
+\concept{Hochwasserzentralen}

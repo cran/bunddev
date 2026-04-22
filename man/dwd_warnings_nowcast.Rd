@@ -15,26 +15,52 @@ dwd_warnings_nowcast(
 \arguments{
 \item{language}{Language code ("de" or "en").}
 
-\item{safe}{Logical; apply throttling and caching.}
+\item{safe}{Logical; if \code{TRUE} (default), apply rate-limiting and cache
+GET responses to \code{tools::R_user_dir("bunddev", "cache")}.}
 
-\item{refresh}{Logical; refresh cached responses.}
+\item{refresh}{Logical; if \code{TRUE}, ignore cached responses and re-fetch
+from the API (default \code{FALSE}).}
 
-\item{flatten}{Logical; drop nested list columns.}
+\item{flatten}{Logical; if \code{TRUE}, simplify nested list columns according to
+\code{flatten_mode}. Default \code{FALSE} keeps list columns as-is.}
 
-\item{flatten_mode}{Flatten strategy for list columns. Use "unnest" to
-expand list-columns into multiple rows.}
+\item{flatten_mode}{How to handle list columns when \code{flatten = TRUE}:
+\describe{
+\item{\code{"drop"}}{Remove list columns entirely. Use when nested data is not
+needed.}
+\item{\code{"json"}}{Convert each list element to a JSON string. Preserves all
+data in a text-queryable format. This is the \strong{default}.}
+\item{\code{"unnest"}}{Expand list columns into multiple rows via
+\code{\link[tidyr:unnest_longer]{tidyr::unnest_longer()}}. \strong{Warning:} this can significantly increase
+the number of rows.}
+}}
 }
 \value{
-A tibble with nowcast warnings.
-
-Includes \code{start_time} and \code{end_time} as POSIXct in Europe/Berlin.
+A tibble with one row per warning:
+\describe{
+\item{type}{Warning type code (numeric).}
+\item{level}{Warning severity level (numeric).}
+\item{start}{Start timestamp in milliseconds (numeric).}
+\item{start_time}{Parsed start time (POSIXct).}
+\item{end}{End timestamp in milliseconds (numeric).}
+\item{end_time}{Parsed end time (POSIXct).}
+\item{description}{Warning description HTML (character).}
+\item{description_text}{Warning description plain text (character).}
+\item{event}{Event name (character).}
+\item{headline}{Warning headline (character).}
+\item{regions}{Affected regions (list-column).}
+\item{urls}{Related URLs (list-column).}
+\item{is_vorabinfo}{Whether this is a preliminary warning (logical).}
+}
+With \code{flatten = TRUE}, the list-columns are transformed according to
+\code{flatten_mode}.
 }
 \description{
 Fetch DWD nowcast warnings
 }
 \details{
 Retrieves nowcast weather warnings from the DWD App API.
-Official docs: https://dwd.api.bund.dev.
+API documentation: \url{https://dwd.api.bund.dev}.
 }
 \examples{
 \dontrun{
@@ -44,4 +70,14 @@ dwd_warnings_nowcast(language = "de", flatten = TRUE)
 }
 \seealso{
 \code{\link[=dwd_municipality_warnings]{dwd_municipality_warnings()}} and \code{\link[=dwd_coast_warnings]{dwd_coast_warnings()}}.
+
+Other DWD: 
+\code{\link{dwd_alpine_forecast_text}()},
+\code{\link{dwd_avalanche_warnings}()},
+\code{\link{dwd_coast_warnings}()},
+\code{\link{dwd_crowd_reports}()},
+\code{\link{dwd_municipality_warnings}()},
+\code{\link{dwd_sea_warning_text}()},
+\code{\link{dwd_station_overview}()}
 }
+\concept{DWD}

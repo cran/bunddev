@@ -14,14 +14,45 @@ dip_bundestag_drucksache(
 \arguments{
 \item{drucksache_id}{Drucksache id.}
 
-\item{params}{Query parameters.}
+\item{params}{Named list of query parameters. Common keys:
+\describe{
+\item{format}{Response format (\code{"json"} recommended; default set by adapter).}
+\item{apikey}{Optional API key as query parameter (prefer auth header).}
+\item{fuzzy}{Free-text search string (character).}
+\item{sort}{Sort field/order definition (character).}
+\item{cursor}{Cursor for pagination (character).}
+\item{limit}{Page size/maximum number of documents (integer).}
+}}
 
-\item{safe}{Logical; apply throttling and caching.}
+\item{safe}{Logical; if \code{TRUE} (default), apply rate-limiting and cache
+GET responses to \code{tools::R_user_dir("bunddev", "cache")}.}
 
-\item{refresh}{Logical; refresh cached responses.}
+\item{refresh}{Logical; if \code{TRUE}, ignore cached responses and re-fetch
+from the API (default \code{FALSE}).}
 }
 \value{
-A tibble with Drucksache metadata.
+A one-row tibble for the selected Drucksache:
+\describe{
+\item{id}{Drucksache identifier (character).}
+\item{typ}{Entity type, always \code{"Dokument"} (character).}
+\item{dokumentart}{Document type, always \code{"Drucksache"} (character).}
+\item{drucksachetyp}{Drucksache subtype, e.g. \code{"Antrag"} (character).}
+\item{dokumentnummer}{Document number, e.g. \code{"19/1"} (character).}
+\item{wahlperiode}{Legislative period (integer).}
+\item{herausgeber}{Publisher: \code{"BT"} or \code{"BR"} (character).}
+\item{datum}{Publication date (character, ISO date).}
+\item{aktualisiert}{Last update timestamp (character, ISO datetime).}
+\item{titel}{Title (character).}
+\item{autoren_anzeige}{Up to 4 authors for display (list-column).}
+\item{autoren_anzahl}{Total author count (integer).}
+\item{fundstelle}{Document reference details (list-column).}
+\item{pdf_hash}{MD5 checksum of the PDF file (character or \code{NA}).}
+\item{urheber}{Authoring bodies (list-column).}
+\item{vorgangsbezug}{Up to 4 related Vorgänge (list-column).}
+\item{vorgangsbezug_anzahl}{Total number of related Vorgänge (integer).}
+\item{ressort}{Government departments involved (list-column).}
+\item{anlagen}{Appendix description (character or \code{NA}).}
+}
 }
 \description{
 Get a DIP Drucksache
@@ -32,3 +63,24 @@ dip_bundestag_drucksache(68852)
 }
 
 }
+\seealso{
+\code{\link[=bunddev_parameters]{bunddev_parameters()}} to inspect available query parameters.
+
+Other DIP Bundestag: 
+\code{\link{dip_bundestag_aktivitaet}()},
+\code{\link{dip_bundestag_aktivitaet_list}()},
+\code{\link{dip_bundestag_drucksache_list}()},
+\code{\link{dip_bundestag_drucksache_text}()},
+\code{\link{dip_bundestag_drucksache_text_list}()},
+\code{\link{dip_bundestag_person}()},
+\code{\link{dip_bundestag_person_list}()},
+\code{\link{dip_bundestag_plenarprotokoll}()},
+\code{\link{dip_bundestag_plenarprotokoll_list}()},
+\code{\link{dip_bundestag_plenarprotokoll_text}()},
+\code{\link{dip_bundestag_plenarprotokoll_text_list}()},
+\code{\link{dip_bundestag_vorgang}()},
+\code{\link{dip_bundestag_vorgang_list}()},
+\code{\link{dip_bundestag_vorgangsposition}()},
+\code{\link{dip_bundestag_vorgangsposition_list}()}
+}
+\concept{DIP Bundestag}

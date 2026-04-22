@@ -1,19 +1,29 @@
 #' Get a Bundestag news article
 #'
 #' @param article_id Article id.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
 #' Returns a single Bundestag news article in XML format.
-#' Official docs: https://bundesapi.github.io/bundestag-api/.
+#' API documentation: \url{https://bundestag.api.bund.dev/}.
 #'
 #' @examples
 #' \dontrun{
 #' bundestag_article(849630)
 #' }
 #'
-#' @return A tibble with article fields.
+#' @return A one-row tibble with fields extracted from the XML document. Column
+#' names correspond to XML element names.
+#' \describe{
+#'   \item{`<tag>`}{One column per unique scalar child element of the XML root
+#'     (character). Exact names depend on the XML document structure.}
+#'   \item{`<repeated_tag>`}{List-column when a child element name appears more
+#'     than once.}
+#' }
+#' @family Bundestag
 #' @export
 bundestag_article <- function(article_id, safe = TRUE, refresh = FALSE) {
   response <- bundestag_request(
@@ -28,19 +38,29 @@ bundestag_article <- function(article_id, safe = TRUE, refresh = FALSE) {
 
 #' Get the current Bundestag speaker
 #'
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
 #' Returns the current speaker from the plenum feed.
-#' Official docs: https://bundesapi.github.io/bundestag-api/.
+#' API documentation: \url{https://bundestag.api.bund.dev/}.
 #'
 #' @examples
 #' \dontrun{
 #' bundestag_speaker()
 #' }
 #'
-#' @return A tibble with speaker fields.
+#' @return A one-row tibble with fields extracted from the XML document (same
+#' structure rules as [bundestag_article()]).
+#' \describe{
+#'   \item{`<tag>`}{One column per unique scalar child element of the XML root
+#'     (character). Exact names depend on the XML document structure.}
+#'   \item{`<repeated_tag>`}{List-column when a child element name appears more
+#'     than once.}
+#' }
+#' @family Bundestag
 #' @export
 bundestag_speaker <- function(safe = TRUE, refresh = FALSE) {
   response <- bundestag_request(
@@ -54,19 +74,29 @@ bundestag_speaker <- function(safe = TRUE, refresh = FALSE) {
 
 #' Get Bundestag conferences overview
 #'
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
 #' Returns conference overview data from the plenum feed.
-#' Official docs: https://bundesapi.github.io/bundestag-api/.
+#' API documentation: \url{https://bundestag.api.bund.dev/}.
 #'
 #' @examples
 #' \dontrun{
 #' bundestag_conferences()
 #' }
 #'
-#' @return A tibble with conference fields.
+#' @return A tibble with one row per `<item>` entry from the conferences feed.
+#' Column names correspond to XML child element names within each `<item>`.
+#' \describe{
+#'   \item{`<tag>`}{One column per unique scalar child element in each
+#'     `<item>` (character). Exact names depend on the feed structure.}
+#'   \item{`<repeated_tag>`}{List-column when a child element name appears more
+#'     than once in a single `<item>`.}
+#' }
+#' @family Bundestag
 #' @export
 bundestag_conferences <- function(safe = TRUE, refresh = FALSE) {
   response <- bundestag_request(
@@ -80,19 +110,29 @@ bundestag_conferences <- function(safe = TRUE, refresh = FALSE) {
 
 #' List Bundestag committees
 #'
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
 #' Returns the committee index from Bundestag XML feeds.
-#' Official docs: https://bundesapi.github.io/bundestag-api/.
+#' API documentation: \url{https://bundestag.api.bund.dev/}.
 #'
 #' @examples
 #' \dontrun{
 #' bundestag_ausschuesse()
 #' }
 #'
-#' @return A tibble with committee entries.
+#' @return A tibble with one row per committee `<item>` from the index feed.
+#' Column names correspond to XML child element names within each `<item>`.
+#' \describe{
+#'   \item{`<tag>`}{One column per unique scalar child element in each
+#'     `<item>` (character). Exact names depend on the feed structure.}
+#'   \item{`<repeated_tag>`}{List-column when a child element name appears more
+#'     than once in a single `<item>`.}
+#' }
+#' @family Bundestag
 #' @export
 bundestag_ausschuesse <- function(safe = TRUE, refresh = FALSE) {
   response <- bundestag_request(
@@ -107,19 +147,29 @@ bundestag_ausschuesse <- function(safe = TRUE, refresh = FALSE) {
 #' Get Bundestag committee details
 #'
 #' @param ausschuss_id Committee id (e.g. "a11").
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
 #' Returns details for a single committee.
-#' Official docs: https://bundesapi.github.io/bundestag-api/.
+#' API documentation: \url{https://bundestag.api.bund.dev/}.
 #'
 #' @examples
 #' \dontrun{
 #' bundestag_ausschuss("a11")
 #' }
 #'
-#' @return A tibble with committee details.
+#' @return A one-row tibble with committee detail fields extracted from XML.
+#' Column names correspond to XML element names.
+#' \describe{
+#'   \item{`<tag>`}{One column per unique scalar child element of the XML root
+#'     (character). Exact names depend on the XML document structure.}
+#'   \item{`<repeated_tag>`}{List-column when a child element name appears more
+#'     than once.}
+#' }
+#' @family Bundestag
 #' @export
 bundestag_ausschuss <- function(ausschuss_id, safe = TRUE, refresh = FALSE) {
   response <- bundestag_request(
@@ -134,19 +184,29 @@ bundestag_ausschuss <- function(ausschuss_id, safe = TRUE, refresh = FALSE) {
 
 #' List Bundestag members of parliament
 #'
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
 #' Returns the index of members of parliament.
-#' Official docs: https://bundesapi.github.io/bundestag-api/.
+#' API documentation: \url{https://bundestag.api.bund.dev/}.
 #'
 #' @examples
 #' \dontrun{
 #' bundestag_mdb_index()
 #' }
 #'
-#' @return A tibble with member entries.
+#' @return A tibble with one row per member `<item>` from the index feed.
+#' Column names correspond to XML child element names within each `<item>`.
+#' \describe{
+#'   \item{`<tag>`}{One column per unique scalar child element in each
+#'     `<item>` (character). Exact names depend on the feed structure.}
+#'   \item{`<repeated_tag>`}{List-column when a child element name appears more
+#'     than once in a single `<item>`.}
+#' }
+#' @family Bundestag
 #' @export
 bundestag_mdb_index <- function(safe = TRUE, refresh = FALSE) {
   response <- bundestag_request(
@@ -161,19 +221,29 @@ bundestag_mdb_index <- function(safe = TRUE, refresh = FALSE) {
 #' Get a Bundestag biography
 #'
 #' @param mdb_id Member id.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
 #' Returns details for a single member of parliament.
-#' Official docs: https://bundesapi.github.io/bundestag-api/.
+#' API documentation: \url{https://bundestag.api.bund.dev/}.
 #'
 #' @examples
 #' \dontrun{
 #' bundestag_mdb_bio(1769)
 #' }
 #'
-#' @return A tibble with biography fields.
+#' @return A one-row tibble with biography fields extracted from XML. Column
+#' names correspond to XML element names.
+#' \describe{
+#'   \item{`<tag>`}{One column per unique scalar child element of the XML root
+#'     (character). Exact names depend on the XML document structure.}
+#'   \item{`<repeated_tag>`}{List-column when a child element name appears more
+#'     than once.}
+#' }
+#' @family Bundestag
 #' @export
 bundestag_mdb_bio <- function(mdb_id, safe = TRUE, refresh = FALSE) {
   response <- bundestag_request(
@@ -189,19 +259,29 @@ bundestag_mdb_bio <- function(mdb_id, safe = TRUE, refresh = FALSE) {
 #' Get a Bundestag video feed entry
 #'
 #' @param content_id Video content id.
-#' @param safe Logical; apply throttling and caching.
-#' @param refresh Logical; refresh cached responses.
+#' @param safe Logical; if `TRUE` (default), apply rate-limiting and cache
+#'   GET responses to `tools::R_user_dir("bunddev", "cache")`.
+#' @param refresh Logical; if `TRUE`, ignore cached responses and re-fetch
+#'   from the API (default `FALSE`).
 #'
 #' @details
 #' Returns a video feed entry from the Bundestag webtv service.
-#' Official docs: https://bundesapi.github.io/bundestag-api/.
+#' API documentation: \url{https://bundestag.api.bund.dev/}.
 #'
 #' @examples
 #' \dontrun{
 #' bundestag_video_feed(7529016)
 #' }
 #'
-#' @return A tibble with video feed fields.
+#' @return A one-row tibble with video feed fields extracted from XML. Column
+#' names correspond to XML element names.
+#' \describe{
+#'   \item{`<tag>`}{One column per unique scalar child element of the XML root
+#'     (character). Exact names depend on the XML document structure.}
+#'   \item{`<repeated_tag>`}{List-column when a child element name appears more
+#'     than once.}
+#' }
+#' @family Bundestag
 #' @export
 bundestag_video_feed <- function(content_id, safe = TRUE, refresh = FALSE) {
   response <- bundestag_request(

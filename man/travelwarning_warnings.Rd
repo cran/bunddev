@@ -7,14 +7,35 @@
 travelwarning_warnings(safe = TRUE, refresh = FALSE)
 }
 \arguments{
-\item{safe}{Logical; apply throttling and caching.}
+\item{safe}{Logical; if \code{TRUE} (default), apply rate-limiting and cache
+GET responses to \code{tools::R_user_dir("bunddev", "cache")}.}
 
-\item{refresh}{Logical; refresh cached responses.}
+\item{refresh}{Logical; if \code{TRUE}, ignore cached responses and re-fetch
+from the API (default \code{FALSE}).}
 }
 \value{
-A tibble with travel warnings.
-
-Includes \code{last_modified_time} and \code{effective_time} as POSIXct in Europe/Berlin.
+A tibble with one row per warning entry.
+\describe{
+\item{content_id}{Character. Entry/content identifier.}
+\item{parent_content_id}{Character. Parent identifier for nested records.}
+\item{response_country}{Character. Country code from response metadata.}
+\item{response_last_modified}{Numeric. Feed-level modification timestamp
+in milliseconds.}
+\item{response_last_modified_time}{POSIXct. Parsed feed-level timestamp
+(Europe/Berlin).}
+\item{last_modified_time}{POSIXct. Entry-level modification timestamp
+(Europe/Berlin).}
+\item{effective_time}{POSIXct. Entry effective timestamp (Europe/Berlin).}
+\item{last_modified}{Numeric. Raw entry modification timestamp in ms.}
+\item{effective}{Numeric. Raw entry effective timestamp in ms.}
+\item{title}{Character. Country travel warning title.}
+\item{country_code}{Character. Two-letter country code.}
+\item{country_name}{Character. Country name (German).}
+\item{warning}{Logical. Full travel warning issued.}
+\item{partial_warning}{Logical. Partial travel warning issued.}
+\item{situation_warning}{Logical. Situation-based travel warning.}
+\item{situation_part_warning}{Logical. Situation-based partial warning.}
+}
 }
 \description{
 List travel warnings
@@ -22,7 +43,7 @@ List travel warnings
 \details{
 The travelwarning API provides travel and safety information from the
 Auswaertiges Amt. This endpoint returns a list of all travel warnings with
-metadata. Official docs: https://travelwarning.api.bund.dev.
+metadata. API documentation: \url{https://travelwarning.api.bund.dev}.
 }
 \examples{
 \dontrun{
@@ -32,4 +53,12 @@ travelwarning_warnings()
 }
 \seealso{
 \code{\link[=travelwarning_warning]{travelwarning_warning()}} for full details of a single warning.
+
+Other Travelwarning: 
+\code{\link{travelwarning_healthcare}()},
+\code{\link{travelwarning_representatives_country}()},
+\code{\link{travelwarning_representatives_germany}()},
+\code{\link{travelwarning_state_names}()},
+\code{\link{travelwarning_warning}()}
 }
+\concept{Travelwarning}

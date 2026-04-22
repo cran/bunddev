@@ -15,24 +15,53 @@ hilfsmittel_untergruppe(
 \arguments{
 \item{id}{Untergruppe id.}
 
-\item{safe}{Logical; apply throttling and caching.}
+\item{safe}{Logical; if \code{TRUE} (default), apply rate-limiting and cache
+GET responses to \code{tools::R_user_dir("bunddev", "cache")}.}
 
-\item{refresh}{Logical; refresh cached responses.}
+\item{refresh}{Logical; if \code{TRUE}, ignore cached responses and re-fetch
+from the API (default \code{FALSE}).}
 
-\item{flatten}{Logical; drop nested list columns.}
+\item{flatten}{Logical; if \code{TRUE}, simplify nested list columns according to
+\code{flatten_mode}. Default \code{FALSE} keeps list columns as-is.}
 
-\item{flatten_mode}{Flatten strategy for list columns. Use "unnest" to
-expand list-columns into multiple rows.}
+\item{flatten_mode}{How to handle list columns when \code{flatten = TRUE}:
+\describe{
+\item{\code{"drop"}}{Remove list columns entirely. Use when nested data is not
+needed.}
+\item{\code{"json"}}{Convert each list element to a JSON string. Preserves all
+data in a text-queryable format. This is the \strong{default}.}
+\item{\code{"unnest"}}{Expand list columns into multiple rows via
+\code{\link[tidyr:unnest_longer]{tidyr::unnest_longer()}}. \strong{Warning:} this can significantly increase
+the number of rows.}
+}}
 }
 \value{
-A tibble with subgroup details.
+A \link[tibble:tibble]{tibble} with one row for the requested subgroup
+and columns:
+\describe{
+\item{id}{Character. Subgroup identifier.}
+\item{versionId}{Character. Internal version identifier.}
+\item{nummer}{Integer. Subgroup number.}
+\item{anwendungsortId}{Character. Application-site identifier.}
+\item{bezeichnung}{Character. Subgroup name.}
+\item{produktgruppeId}{Character. Parent product-group identifier.}
+\item{nachweisschemaId}{Character. Verification-schema identifier.}
+\item{sechsSteller}{Character. Six-digit code.}
+\item{isNnElement}{Logical. Internal flag (usage unclear).}
+\item{produktgruppe}{Numeric. Always \code{NA}.}
+\item{anwendungsort}{Numeric. Always \code{NA}.}
+\item{aufnahmeDatum}{Character. Admission date (ISO-8601).}
+\item{aenderungsDatum}{Character. Last-modified date (ISO-8601).}
+\item{aufnahmeDatum_time}{POSIXct. Parsed admission date (Europe/Berlin).}
+\item{aenderungsDatum_time}{POSIXct. Parsed last-modified date (Europe/Berlin).}
+}
 }
 \description{
 Get Hilfsmittel subgroup details
 }
 \details{
 Returns details for a subgroup (Untergruppe).
-Official docs: https://github.com/bundesAPI/hilfsmittel-api.
+API documentation: \url{https://github.com/bundesAPI/hilfsmittel-api}.
 }
 \examples{
 \dontrun{
@@ -40,3 +69,13 @@ hilfsmittel_untergruppe("c92d1976-d3cb-4b9f-bcdf-805272a9ea86")
 }
 
 }
+\seealso{
+Other Hilfsmittel: 
+\code{\link{hilfsmittel_nachweisschema}()},
+\code{\link{hilfsmittel_produkt}()},
+\code{\link{hilfsmittel_produktart}()},
+\code{\link{hilfsmittel_produkte}()},
+\code{\link{hilfsmittel_produktgruppe}()},
+\code{\link{hilfsmittel_tree}()}
+}
+\concept{Hilfsmittel}
